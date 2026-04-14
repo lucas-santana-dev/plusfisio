@@ -1,0 +1,25 @@
+<resources>
+    <string name="auth_brand_badge">PF</string>
+    <string name="auth_brand_name">PlusFisio</string>
+    <string name="auth_login_brand_subtitle">Organize atendimentos, agenda e rotina clinica com uma experiencia leve no celular.</string>
+    <string name="auth_login_title">Entrar</string>
+    <string name="auth_login_description">Use seu acesso profissional para entrar no app.</string>
+    <string name="auth_email_label">E-mail</string>
+    <string name="auth_password_label">Senha</string>
+    <string name="auth_show_password">Mostrar</string>
+    <string name="auth_hide_password">Ocultar</string>
+    <string name="auth_forgot_password">Esqueci a senha</string>
+    <string name="auth_login_button">Entrar</string>
+    <string name="auth_login_loading">Entrando...</string>
+    <string name="auth_login_placeholder_info">Nesta fase inicial, a interface ja esta pronta e a autenticacao real sera conectada nas proximas etapas.</string>
+    <string name="auth_highlight_title">Primeiro acesso do dia</string>
+    <string name="auth_highlight_description">Agenda, confirmacoes e cobranca simples em um fluxo pensado para uso rapido no celular.</string>
+    <string name="auth_splash_subtitle">Sua operacao clinica mais simples, leve e organizada desde a abertura do dia.</string>
+    <string name="auth_splash_status">Preparando sua rotina do dia</string>
+    <string name="auth_error_email_required">Informe seu e-mail.</string>
+    <string name="auth_error_email_invalid">Digite um e-mail valido.</string>
+    <string name="auth_error_password_required">Informe sua senha.</string>
+    <string name="auth_error_password_short">A senha precisa ter pelo menos 6 caracteres.</string>
+    <string name="auth_event_login_pending">A autenticacao sera conectada nas proximas etapas do MVP.</string>
+    <string name="auth_event_forgot_password_pending">A recuperacao de senha sera adicionada quando o fluxo real de login estiver conectado.</string>
+</resources>
