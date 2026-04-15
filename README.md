@@ -109,13 +109,15 @@ O ICP inicial do PlusFisio é:
 
 1. Clonar o repositório.
 2. Abrir o projeto no Android Studio.
-3. Configurar credenciais e arquivos do Firebase.
+3. Configurar Firebase CLI e arquivos do projeto.
 4. Rodar o app Android pelo módulo `composeApp`.
 5. Abrir `iosApp` no Xcode quando a configuração iOS estiver pronta.
 
 ### Observação
 
 Esta seção ainda é um placeholder operacional. O setup detalhado deve ser refinado junto com a integração real do Firebase.
+
+Setup detalhado do Firebase: `docs/firebase-setup.md`.
 
 ## Roadmap curto
 
@@ -129,3 +131,17 @@ Esta seção ainda é um placeholder operacional. O setup detalhado deve ser ref
 - [Produto](docs/product.md)
 - [MVP](docs/mvp.md)
 - [Arquitetura](docs/architecture.md)
+- [Firebase Setup](docs/firebase-setup.md)
+- [Auth Foundation](docs/auth.md)
+- [Engineering Workflow](docs/engineering.md)
+- [Project Management](docs/project-management.md)
+
+## Auth Foundation Update
+
+The repository now includes the first functional auth foundation for the MVP:
+
+- splash -> session gate -> login/onboarding placeholder/home template
+- typed auth contracts in `commonMain`
+- Koin wiring for auth and app root ViewModels
+- Firebase Auth + Firestore wired as the default provider on Android
+- iOS app prepared for Firebase, with the native Apple package still pending in Xcode

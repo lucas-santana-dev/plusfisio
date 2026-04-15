@@ -1,0 +1,64 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwnUser(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function studioMembershipDoc(studioId) {
+      return /databases/$(database)/documents/studios/$(studioId)/members/$(request.auth.uid);
+    }
+
+    function isStudioMember(studioId) {
+      return isSignedIn()
+        && studioId is string
+        && exists(studioMembershipDoc(studioId));
+    }
+
+    function incomingStudioIdMatchesPath(studioId) {
+      return !("studioId" in request.resource.data)
+        || request.resource.data.studioId == studioId;
+    }
+
+    function existingStudioIdMatchesPath(studioId) {
+      return !("studioId" in resource.data)
+        || resource.data.studioId == studioId;
+    }
+
+    match /users/{userId} {
+      allow read, create, update: if isOwnUser(userId);
+      allow delete: if false;
+    }
+
+    match /studios/{studioId} {
+      allow read: if isStudioMember(studioId);
+      allow create: if isSignedIn()
+        && request.resource.data.ownerUserId == request.auth.uid
+        && request.resource.data.studioId == studioId;
+      allow update, delete: if isStudioMember(studioId);
+
+      match /{document=**} {
+        allow read: if isStudioMember(studioId);
+        allow create, update: if isStudioMember(studioId)
+          && incomingStudioIdMatchesPath(studioId)
+          && existingStudioIdMatchesPath(studioId);
+        allow delete: if isStudioMember(studioId)
+          && existingStudioIdMatchesPath(studioId);
+      }
+
+      match /members/{userId} {
+        allow read: if isStudioMember(studioId) || isOwnUser(userId);
+        allow create: if isOwnUser(userId)
+          && request.resource.data.studioId == studioId
+          && request.resource.data.userId == userId;
+        allow update: if isStudioMember(studioId)
+          && existingStudioIdMatchesPath(studioId);
+        allow delete: if isStudioMember(studioId);
+      }
+    }
+  }
+}
