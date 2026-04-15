@@ -2,6 +2,7 @@ package br.com.plusapps.plusfisio.features.auth.presentation.login
 
 import androidx.compose.runtime.Stable
 import br.com.plusapps.plusfisio.core.presentation.text.UiText
+import br.com.plusapps.plusfisio.features.auth.domain.AuthSession
 
 /**
  * Estado imutavel da tela de login.
@@ -27,6 +28,7 @@ sealed interface LoginAction {
     data class OnPasswordChanged(val value: String) : LoginAction
     data object OnTogglePasswordVisibility : LoginAction
     data object OnLoginClicked : LoginAction
+    data object OnCreateAccountClicked : LoginAction
     data object OnForgotPasswordClicked : LoginAction
 }
 
@@ -35,5 +37,6 @@ sealed interface LoginAction {
  */
 sealed interface LoginEvent {
     data class ShowMessage(val message: UiText) : LoginEvent
-    data object Authenticated : LoginEvent
+    data class Authenticated(val session: AuthSession) : LoginEvent
+    data object NavigateToSignUp : LoginEvent
 }

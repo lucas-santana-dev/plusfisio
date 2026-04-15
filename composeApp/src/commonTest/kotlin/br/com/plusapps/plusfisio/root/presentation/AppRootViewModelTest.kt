@@ -90,11 +90,69 @@ class AppRootViewModelTest {
         assertEquals(AppRoute.Home, viewModel.state.value.route)
         assertEquals(session, viewModel.state.value.session)
     }
+
+    @Test
+    fun `login completion uses returned session immediately`() = runTest(dispatcher) {
+        val session = AuthSession(
+            userId = "user-owner",
+            email = "owner@plusfisio.com",
+            displayName = "Camila",
+            studioId = null,
+            role = null
+        )
+        val repository = RootAuthRepositoryForTest(currentSession = null)
+
+        val viewModel = AppRootViewModel(
+            observeAuthSessionUseCase = ObserveAuthSessionUseCase(repository),
+            signOutUseCase = SignOutUseCase(repository)
+        )
+        advanceUntilIdle()
+
+        assertEquals(AppRoute.Login, viewModel.state.value.route)
+
+        viewModel.onLoginCompleted(session)
+
+        assertEquals(AppRoute.Onboarding, viewModel.state.value.route)
+        assertEquals(session, viewModel.state.value.session)
+    }
+
+    @Test
+    fun `sign up request navigates to sign up route`() = runTest(dispatcher) {
+        val repository = RootAuthRepositoryForTest(currentSession = null)
+        val viewModel = AppRootViewModel(
+            observeAuthSessionUseCase = ObserveAuthSessionUseCase(repository),
+            signOutUseCase = SignOutUseCase(repository)
+        )
+        advanceUntilIdle()
+
+        viewModel.onSignUpRequested()
+
+        assertEquals(AppRoute.SignUp, viewModel.state.value.route)
+    }
+
+    @Test
+    fun `login request navigates back to login route`() = runTest(dispatcher) {
+        val repository = RootAuthRepositoryForTest(currentSession = null)
+        val viewModel = AppRootViewModel(
+            observeAuthSessionUseCase = ObserveAuthSessionUseCase(repository),
+            signOutUseCase = SignOutUseCase(repository)
+        )
+        advanceUntilIdle()
+
+        viewModel.onSignUpRequested()
+        viewModel.onLoginRequested()
+
+        assertEquals(AppRoute.Login, viewModel.state.value.route)
+    }
 }
 
 private class RootAuthRepositoryForTest(
     private var currentSession: AuthSession?
 ) : AuthRepository {
+
+    override suspend fun signUp(name: String, email: String, password: String): Result<AuthSession, AuthError> {
+        return Result.Failure(AuthError.Unknown)
+    }
 
     override suspend fun signIn(email: String, password: String): Result<AuthSession, AuthError> {
         return Result.Failure(AuthError.Unknown)

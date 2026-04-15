@@ -58,6 +58,7 @@ class LoginViewModel(
                 }
             }
 
+            LoginAction.OnCreateAccountClicked -> emitEvent(LoginEvent.NavigateToSignUp)
             LoginAction.OnLoginClicked -> submit()
             LoginAction.OnForgotPasswordClicked -> emitForgotPasswordMessage()
         }
@@ -81,11 +82,11 @@ class LoginViewModel(
             signInUseCase(
                 email = current.email.trim(),
                 password = current.password
-            ).onSuccess {
+            ).onSuccess { session ->
                 _state.update { state ->
                     state.copy(isLoading = false)
                 }
-                emitEvent(LoginEvent.Authenticated)
+                emitEvent(LoginEvent.Authenticated(session))
             }.onFailure { error ->
                 _state.update { state ->
                     state.copy(isLoading = false)

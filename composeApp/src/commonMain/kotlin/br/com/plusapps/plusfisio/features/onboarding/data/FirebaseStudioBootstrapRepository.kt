@@ -1,6 +1,9 @@
 package br.com.plusapps.plusfisio.features.onboarding.data
 
 import br.com.plusapps.plusfisio.currentEpochMillis
+import br.com.plusapps.plusfisio.core.data.firestore.UserProfileDocument
+import br.com.plusapps.plusfisio.core.data.firestore.buildBaseUserProfile
+import br.com.plusapps.plusfisio.core.data.firestore.mergeWithAuth
 import br.com.plusapps.plusfisio.core.domain.EmptyResult
 import br.com.plusapps.plusfisio.core.domain.Result
 import br.com.plusapps.plusfisio.core.domain.model.BusinessType
@@ -50,31 +53,31 @@ class FirebaseStudioBootstrapRepository : StudioBootstrapRepository {
             createdAtEpochMillis = now,
             updatedAtEpochMillis = now
         )
-        val userProfileDocument = UserProfileDocument(
-            userId = currentUser.uid,
-            email = currentUser.email.orEmpty(),
-            displayName = currentUser.displayName,
-            studioId = studioId,
-            role = StudioUserRole.OwnerAdmin,
-            createdAtEpochMillis = now,
-            updatedAtEpochMillis = now
-        )
 
         return try {
-            val existingProfileSnapshot = userProfileReference.get()
-            if (existingProfileSnapshot.exists) {
-                val existingProfile = existingProfileSnapshot.data<UserProfileDocument>()
-                if (existingProfile.studioId == studioId) {
-                    ensureBootstrapDocuments(
-                        studioReference = studioReference,
-                        memberReference = memberReference,
-                        userProfileReference = userProfileReference,
-                        studioDocument = studioDocument,
-                        memberDocument = memberDocument,
-                        userProfileDocument = userProfileDocument
-                    )
-                    return Result.Success(Unit)
-                }
+            val existingProfile = ensureBaseUserProfile(
+                userProfileReference = userProfileReference,
+                currentUser = currentUser,
+                now = now
+            )
+            val userProfileDocument = existingProfile.toBootstrapProfile(
+                userId = currentUser.uid,
+                email = currentUser.email.orEmpty(),
+                displayName = currentUser.displayName,
+                studioId = studioId,
+                now = now
+            )
+
+            if (existingProfile.studioId == studioId) {
+                ensureBootstrapDocuments(
+                    studioReference = studioReference,
+                    memberReference = memberReference,
+                    userProfileReference = userProfileReference,
+                    studioDocument = studioDocument,
+                    memberDocument = memberDocument,
+                    userProfileDocument = userProfileDocument
+                )
+                return Result.Success(Unit)
             }
 
             ensureBootstrapDocuments(
@@ -91,6 +94,31 @@ class FirebaseStudioBootstrapRepository : StudioBootstrapRepository {
         } catch (_: Exception) {
             Result.Failure(OnboardingError.Unknown)
         }
+    }
+
+    private suspend fun ensureBaseUserProfile(
+        userProfileReference: dev.gitlive.firebase.firestore.DocumentReference,
+        currentUser: dev.gitlive.firebase.auth.FirebaseUser,
+        now: Long
+    ): UserProfileDocument {
+        val snapshot = userProfileReference.get()
+
+        if (snapshot.exists) {
+            return snapshot.data<UserProfileDocument>().mergeWithAuth(
+                userId = currentUser.uid,
+                email = currentUser.email.orEmpty(),
+                displayName = currentUser.displayName
+            )
+        }
+
+        val baseProfile = buildBaseUserProfile(
+            userId = currentUser.uid,
+            email = currentUser.email.orEmpty(),
+            displayName = currentUser.displayName,
+            now = now
+        )
+        userProfileReference.set(baseProfile)
+        return baseProfile
     }
 
     private suspend fun ensureBootstrapDocuments(
@@ -139,18 +167,25 @@ private data class StudioMemberDocument(
     val updatedAtEpochMillis: Long
 )
 
-@Serializable
-private data class UserProfileDocument(
-    val userId: String,
-    val email: String,
-    val displayName: String? = null,
-    val studioId: String,
-    val role: StudioUserRole,
-    val createdAtEpochMillis: Long,
-    val updatedAtEpochMillis: Long
-)
-
 private fun stableStudioIdFor(userId: String): String = "studio_${userId.take(12)}"
+
+internal fun UserProfileDocument?.toBootstrapProfile(
+    userId: String,
+    email: String,
+    displayName: String?,
+    studioId: String,
+    now: Long
+): UserProfileDocument {
+    return UserProfileDocument(
+        userId = this?.userId?.ifBlank { userId } ?: userId,
+        email = this?.email?.ifBlank { email } ?: email,
+        displayName = this?.displayName ?: displayName,
+        studioId = studioId,
+        role = StudioUserRole.OwnerAdmin,
+        createdAtEpochMillis = this?.createdAtEpochMillis ?: now,
+        updatedAtEpochMillis = now
+    )
+}
 
 private fun FirebaseFirestoreException.toOnboardingError(): OnboardingError {
     val normalizedMessage = message?.lowercase().orEmpty()

@@ -7,6 +7,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.plusapps.plusfisio.features.auth.presentation.login.LoginRoot
+import br.com.plusapps.plusfisio.features.auth.presentation.signup.SignUpRoot
 import br.com.plusapps.plusfisio.features.auth.presentation.splash.SplashScreen
 import br.com.plusapps.plusfisio.features.home.presentation.HomeTemplateScreen
 import br.com.plusapps.plusfisio.features.onboarding.presentation.OnboardingRoot
@@ -27,6 +28,15 @@ fun AppRoot(
             state.route == AppRoute.Login -> {
                 LoginRoot(
                     onAuthenticated = viewModel::onLoginCompleted,
+                    onNavigateToSignUp = viewModel::onSignUpRequested,
+                    contentPadding = innerPadding
+                )
+            }
+
+            state.route == AppRoute.SignUp -> {
+                SignUpRoot(
+                    onAuthenticated = viewModel::onSignUpCompleted,
+                    onNavigateToLogin = viewModel::onLoginRequested,
                     contentPadding = innerPadding
                 )
             }

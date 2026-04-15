@@ -77,7 +77,6 @@ fun OnboardingRoot(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
     ) {
         OnboardingScreen(
-            session = session,
             state = state,
             onAction = viewModel::onAction,
             onSignOutClick = onSignOutClick,
@@ -88,7 +87,6 @@ fun OnboardingRoot(
 
 @Composable
 fun OnboardingScreen(
-    session: AuthSession,
     state: OnboardingState,
     onAction: (OnboardingAction) -> Unit,
     onSignOutClick: () -> Unit,
@@ -120,7 +118,7 @@ fun OnboardingScreen(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = stringResource(Res.string.onboarding_description, session.email),
+                        text = stringResource(Res.string.onboarding_description),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -256,13 +254,6 @@ private fun BusinessTypeOption(
 private fun OnboardingScreenPreview() {
     PlusFisioTheme {
         OnboardingScreen(
-            session = AuthSession(
-                userId = "1",
-                email = "lucassantana@teste.com",
-                displayName = "Lucas",
-                studioId = null,
-                role = null
-            ),
             state = OnboardingState(),
             onAction = {},
             onSignOutClick = {}

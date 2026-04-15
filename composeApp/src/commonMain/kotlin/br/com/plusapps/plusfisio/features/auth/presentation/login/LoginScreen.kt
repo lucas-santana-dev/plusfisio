@@ -21,6 +21,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -44,6 +45,7 @@ import br.com.plusapps.plusfisio.core.presentation.text.UiText
 import br.com.plusapps.plusfisio.core.presentation.text.asString
 import br.com.plusapps.plusfisio.core.presentation.text.resolve
 import br.com.plusapps.plusfisio.core.presentation.theme.PlusFisioTheme
+import br.com.plusapps.plusfisio.features.auth.domain.AuthSession
 import br.com.plusapps.plusfisio.features.auth.presentation.components.AuthBackground
 import br.com.plusapps.plusfisio.features.auth.presentation.components.AuthBranding
 import br.com.plusapps.plusfisio.features.auth.presentation.components.AuthHighlightCard
@@ -62,6 +64,7 @@ import plusfisio.composeapp.generated.resources.auth_highlight_description
 import plusfisio.composeapp.generated.resources.auth_highlight_title
 import plusfisio.composeapp.generated.resources.auth_login_brand_subtitle
 import plusfisio.composeapp.generated.resources.auth_login_button
+import plusfisio.composeapp.generated.resources.auth_login_create_account
 import plusfisio.composeapp.generated.resources.auth_login_description
 import plusfisio.composeapp.generated.resources.auth_login_loading
 import plusfisio.composeapp.generated.resources.auth_login_placeholder_info
@@ -77,7 +80,8 @@ import plusfisio.composeapp.generated.resources.auth_show_password
  */
 @Composable
 fun LoginRoot(
-    onAuthenticated: () -> Unit,
+    onAuthenticated: (AuthSession) -> Unit,
+    onNavigateToSignUp: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     viewModel: LoginViewModel = koinViewModel()
 ) {
@@ -87,7 +91,8 @@ fun LoginRoot(
     LaunchedEffect(viewModel) {
         viewModel.events.collect { event ->
             when (event) {
-                LoginEvent.Authenticated -> onAuthenticated()
+                is LoginEvent.Authenticated -> onAuthenticated(event.session)
+                LoginEvent.NavigateToSignUp -> onNavigateToSignUp()
                 is LoginEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message.resolve())
             }
         }
@@ -234,6 +239,17 @@ private fun LoginCard(
                         style = MaterialTheme.typography.labelLarge
                     )
                 }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = { onAction(LoginAction.OnCreateAccountClicked) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(52.dp),
+                enabled = !state.isLoading,
+                shape = RoundedCornerShape(20.dp)
+            ) {
+                Text(stringResource(Res.string.auth_login_create_account))
             }
             Spacer(modifier = Modifier.height(18.dp))
             Text(

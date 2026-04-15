@@ -23,8 +23,38 @@ class AppRootViewModel(
         refreshDestination()
     }
 
-    fun onLoginCompleted() {
-        refreshDestination()
+    fun onSignUpRequested() {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.SignUp,
+                session = null
+            )
+        }
+    }
+
+    fun onLoginRequested() {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.Login,
+                session = null
+            )
+        }
+    }
+
+    fun onLoginCompleted(session: AuthSession) {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                session = session,
+                route = session.toRoute()
+            )
+        }
+    }
+
+    fun onSignUpCompleted(session: AuthSession) {
+        onLoginCompleted(session)
     }
 
     fun onOnboardingCompleted() {
@@ -69,6 +99,7 @@ data class AppRootState(
 sealed interface AppRoute {
     data object Splash : AppRoute
     data object Login : AppRoute
+    data object SignUp : AppRoute
     data object Onboarding : AppRoute
     data object Home : AppRoute
 }

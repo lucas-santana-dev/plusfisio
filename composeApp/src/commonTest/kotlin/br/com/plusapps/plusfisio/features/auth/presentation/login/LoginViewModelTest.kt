@@ -55,16 +55,15 @@ class LoginViewModelTest {
 
     @Test
     fun `successful login emits authenticated event`() = runTest(dispatcher) {
+        val session = AuthSession(
+            userId = "user-1",
+            email = "owner@plusfisio.com",
+            displayName = "Camila",
+            studioId = "studio-1",
+            role = StudioUserRole.OwnerAdmin
+        )
         val repository = FakeAuthRepositoryForTest(
-            signInResult = Result.Success(
-                AuthSession(
-                    userId = "user-1",
-                    email = "owner@plusfisio.com",
-                    displayName = "Camila",
-                    studioId = "studio-1",
-                    role = StudioUserRole.OwnerAdmin
-                )
-            )
+            signInResult = Result.Success(session)
         )
         val viewModel = LoginViewModel(SignInUseCase(repository))
 
@@ -75,7 +74,7 @@ class LoginViewModelTest {
             viewModel.onAction(LoginAction.OnLoginClicked)
             advanceUntilIdle()
 
-            assertEquals(LoginEvent.Authenticated, awaitItem())
+            assertEquals(LoginEvent.Authenticated(session), awaitItem())
         }
 
         assertFalse(viewModel.state.value.isLoading)
@@ -96,6 +95,17 @@ class LoginViewModelTest {
             advanceUntilIdle()
 
             assertIs<LoginEvent.ShowMessage>(awaitItem())
+        }
+    }
+
+    @Test
+    fun `create account click emits navigation event`() = runTest(dispatcher) {
+        val viewModel = LoginViewModel(SignInUseCase(FakeAuthRepositoryForTest()))
+
+        viewModel.events.test {
+            viewModel.onAction(LoginAction.OnCreateAccountClicked)
+
+            assertEquals(LoginEvent.NavigateToSignUp, awaitItem())
         }
     }
 
@@ -142,6 +152,10 @@ private class FakeAuthRepositoryForTest(
     ),
     private val pendingGate: CompletableDeferred<Unit>? = null
 ) : AuthRepository {
+
+    override suspend fun signUp(name: String, email: String, password: String): Result<AuthSession, AuthError> {
+        return Result.Failure(AuthError.Unknown)
+    }
 
     override suspend fun signIn(email: String, password: String): Result<AuthSession, AuthError> {
         pendingGate?.await()
