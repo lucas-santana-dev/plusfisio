@@ -9,15 +9,16 @@ Documentar o setup real do app iOS do PlusFisio para abrir, compilar e rodar no 
 - o modulo compartilhado gera framework para `iosArm64`, `iosSimulatorArm64` e `iosX64`
 - o projeto iOS usa `embedAndSignAppleFrameworkForXcode` no build do Xcode
 - o Firebase Apple SDK esta integrado ao `iosApp.xcodeproj` via Swift Package Manager
-- o deployment target do app iOS foi reduzido para `13.0`
+- o deployment target do app iOS esta em `14.0`
 - a assinatura local usa override por `.xcconfig`, sem exigir edicao de arquivo rastreado
 
 ## Pre-requisitos no Mac
 
 - Xcode instalado
-- JDK 17 disponivel para o Gradle
+- JDK do Android Studio disponivel para o Gradle
 - conta Apple configurada no Xcode se for rodar em dispositivo fisico
 - arquivos locais do Firebase para o projeto `plusfisio-a57f5`
+- Android SDK configurado no terminal
 
 ## Arquivos locais obrigatorios
 
@@ -50,7 +51,7 @@ O arquivo base usa `#include? "Config.local.xcconfig"`, entao o override local e
 
 ## Como abrir e rodar
 
-1. Garanta que o JDK 17 esteja ativo para o Gradle no terminal e no Xcode.
+1. Garanta que o JDK do Android Studio esteja ativo para o Gradle no terminal e no Xcode.
 2. Coloque `GoogleService-Info.plist` em `iosApp/iosApp/`.
 3. Crie `iosApp/Configuration/Config.local.xcconfig` a partir do exemplo e preencha `TEAM_ID`.
 4. Abra `iosApp/iosApp.xcodeproj` no Xcode.
@@ -65,6 +66,15 @@ Durante o build, o Xcode executa:
 ```
 
 Isso continua sendo a integracao oficial entre Xcode e o framework KMP compartilhado.
+
+## Toolchain validada nesta maquina
+
+- macOS `15.5`
+- Xcode `16.2`
+- Gradle wrapper `8.14.3`
+- `JAVA_HOME=/Applications/Android Studio.app/Contents/jbr/Contents/Home`
+
+O projeto continua compilando com target Java 17 em Android, mas o runtime do Gradle pode usar JDK 21 sem conflito.
 
 ## Validacao por arquitetura
 
@@ -84,7 +94,7 @@ O projeto nao fixa mais `ARCHS = arm64` no target iOS, para nao bloquear simulad
 
 O projeto iOS referencia o pacote `https://github.com/firebase/firebase-ios-sdk` com versao exata `11.15.0`.
 
-Essa versao foi escolhida para manter o deployment target do app em `iOS 13.0`. Versoes mais novas do Firebase Apple SDK elevam o piso de iOS e quebrariam esse objetivo.
+O app usa o lifecycle moderno do SwiftUI (`App`, `Scene` e `@UIApplicationDelegateAdaptor`), entao o deployment target efetivo precisa ser `iOS 14.0` ou maior.
 
 Produtos vinculados ao target `iosApp`:
 
@@ -100,16 +110,15 @@ Produtos vinculados ao target `iosApp`:
 
 ## Validacao registrada nesta task
 
-- validado por inspecao de configuracao:
+- validado nesta maquina:
   - target KMP com `iosX64`, `iosSimulatorArm64` e `iosArm64`
   - script `embedAndSignAppleFrameworkForXcode` preservado no `iosApp.xcodeproj`
   - Firebase Apple SDK configurado via Swift Package Manager no projeto iOS
-  - assinatura local via `.xcconfig` com override ignorado pelo Git
-  - `GoogleService-Info.plist` mantido fora do versionamento
-- nao validado neste ambiente:
-  - abertura real do projeto no Xcode
-  - execucao em simulador Apple Silicon
-  - execucao em simulador Intel
-  - execucao em dispositivo fisico
-
-Essas validacoes ficaram pendentes porque o ambiente atual nao possui macOS, Xcode nem simuladores iOS.
+  - resolucao real de pacotes SwiftPM do Firebase no Xcode
+  - `xcodebuild -project iosApp/iosApp.xcodeproj -list`
+  - `xcrun simctl list`
+  - build do framework compartilhado KMP para simulador iniciado com sucesso no Gradle
+  - build do projeto iOS iniciado com sucesso no Xcode para simulador local
+- ainda depende de arquivos locais para validacao funcional completa:
+  - `iosApp/iosApp/GoogleService-Info.plist`
+  - `iosApp/Configuration/Config.local.xcconfig` com `TEAM_ID` se houver execucao com assinatura local

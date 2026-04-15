@@ -102,16 +102,22 @@ O ICP inicial do PlusFisio é:
 
 - Android Studio atualizado
 - Xcode para build iOS
-- JDK 17
+- JDK do Android Studio configurado no terminal para o Gradle
+- Android SDK em `~/Library/Android/sdk`
+- Android SDK Command-line Tools instaladas para usar `sdkmanager`
 - configuração de projeto Firebase
 
 ### Setup inicial
 
 1. Clonar o repositório.
-2. Abrir o projeto no Android Studio.
-3. Configurar Firebase CLI e arquivos do projeto.
-4. Rodar o app Android pelo módulo `composeApp`.
-5. Para iOS, seguir `docs/ios-setup.md` e abrir `iosApp/iosApp.xcodeproj` no Xcode.
+2. Dar permissão ao wrapper Gradle com `chmod +x gradlew`.
+3. Expor a toolchain local no shell com `source scripts/setup-kmp-env.zsh` ou incluindo esse arquivo no `~/.zshrc`.
+4. Configurar Firebase CLI e arquivos locais do projeto.
+5. Abrir o projeto no Android Studio e aguardar o sync.
+6. Rodar o app Android pelo módulo `composeApp`.
+7. Para iOS, seguir `docs/ios-setup.md` e abrir `iosApp/iosApp.xcodeproj` no Xcode.
+
+O projeto compila bytecode Java 17, mas o Gradle desta máquina pode rodar com o JBR 21 do Android Studio.
 
 Setup detalhado do Firebase: `docs/firebase-setup.md`.
 

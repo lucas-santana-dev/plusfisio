@@ -181,7 +181,7 @@ firebase projects:list
 
 ## Pontos de atencao
 
-- Os arquivos `composeApp/google-services.json` e `iosApp/iosApp/GoogleService-Info.plist` foram adicionados localmente e estao no `.gitignore`.
+- Os arquivos `composeApp/google-services.json` e `iosApp/iosApp/GoogleService-Info.plist` precisam existir localmente e estao no `.gitignore`.
 - O provider `Email/Password` ainda precisa estar habilitado no console do Firebase Authentication.
 - O projeto iOS ja inclui o Firebase Apple SDK via Swift Package Manager; o passo manual remanescente no Mac e apenas fornecer `GoogleService-Info.plist` local e configurar assinatura.
 - Se o onboarding inicial do estudio ainda nao estiver definido, o usuario autenticado continuara caindo no fluxo de onboarding com `studioId = null`.
