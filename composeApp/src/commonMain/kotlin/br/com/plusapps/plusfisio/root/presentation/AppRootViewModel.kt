@@ -27,6 +27,10 @@ class AppRootViewModel(
         refreshDestination()
     }
 
+    fun onOnboardingCompleted() {
+        refreshDestination()
+    }
+
     fun onSignOut() {
         viewModelScope.launch {
             signOutUseCase()

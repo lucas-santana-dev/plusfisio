@@ -289,3 +289,31 @@ Current provider:
 - `FirebaseAuthRepository` is now the default binding
 - it authenticates with Firebase Auth and resolves `AuthSession` using `users/{uid}` in Firestore
 - if `studioId` is missing, the authenticated user is routed to onboarding placeholder
+
+## Firestore Foundation Implemented
+
+The backend now uses a canonical tenant model:
+
+- `users/{uid}`
+- `studios/{studioId}`
+- `studios/{studioId}/members/{uid}`
+- `studios/{studioId}/clients/{clientId}`
+- `studios/{studioId}/appointments/{appointmentId}`
+- `studios/{studioId}/packages/{packageId}`
+- `studios/{studioId}/packageLedger/{entryId}`
+- `studios/{studioId}/payments/{paymentId}`
+
+Bootstrap strategy:
+
+- authenticated user without `studioId` enters onboarding
+- onboarding creates the studio document
+- onboarding creates the first membership as `OwnerAdmin`
+- onboarding updates `users/{uid}` with `studioId` and `role`
+- app refreshes the session and routes to home
+
+Cost strategy for Spark:
+
+- no collectionGroup reads in the app flow for now
+- no analytics collections
+- no speculative indexes
+- appointment and payment queries optimized around daily operation

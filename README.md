@@ -131,6 +131,7 @@ Setup detalhado do Firebase: `docs/firebase-setup.md`.
 - [Produto](docs/product.md)
 - [MVP](docs/mvp.md)
 - [Arquitetura](docs/architecture.md)
+- [Firestore Model](docs/firestore-model.md)
 - [Firebase Setup](docs/firebase-setup.md)
 - [Auth Foundation](docs/auth.md)
 - [Engineering Workflow](docs/engineering.md)
@@ -145,3 +146,12 @@ The repository now includes the first functional auth foundation for the MVP:
 - Koin wiring for auth and app root ViewModels
 - Firebase Auth + Firestore wired as the default provider on Android
 - iOS app prepared for Firebase, with the native Apple package still pending in Xcode
+
+## Firestore Foundation Update
+
+The repository now includes the initial Firestore foundation for the MVP:
+
+- canonical tenant model with `users`, `studios`, `members`, `clients`, `appointments`, `packages`, `packageLedger`, and `payments`
+- real onboarding bootstrap that creates the first studio and membership
+- security rules aligned with tenant isolation and owner/member permissions
+- indexes limited to the operational queries most likely to be used in the Spark plan

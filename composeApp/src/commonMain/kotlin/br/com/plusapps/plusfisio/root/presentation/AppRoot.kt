@@ -9,7 +9,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.plusapps.plusfisio.features.auth.presentation.login.LoginRoot
 import br.com.plusapps.plusfisio.features.auth.presentation.splash.SplashScreen
 import br.com.plusapps.plusfisio.features.home.presentation.HomeTemplateScreen
-import br.com.plusapps.plusfisio.features.onboarding.presentation.OnboardingPlaceholderScreen
+import br.com.plusapps.plusfisio.features.onboarding.presentation.OnboardingRoot
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -32,8 +32,9 @@ fun AppRoot(
             }
 
             state.route == AppRoute.Onboarding -> {
-                OnboardingPlaceholderScreen(
+                OnboardingRoot(
                     session = requireNotNull(state.session),
+                    onCompleted = viewModel::onOnboardingCompleted,
                     onSignOutClick = viewModel::onSignOut,
                     contentPadding = innerPadding
                 )

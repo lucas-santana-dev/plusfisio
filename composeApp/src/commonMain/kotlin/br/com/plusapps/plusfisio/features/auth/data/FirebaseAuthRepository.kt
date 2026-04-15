@@ -1,5 +1,8 @@
 package br.com.plusapps.plusfisio.features.auth.data
 
+import br.com.plusapps.plusfisio.currentEpochMillis
+import br.com.plusapps.plusfisio.core.domain.model.FirestoreCollections
+import br.com.plusapps.plusfisio.core.domain.model.StudioUserRole
 import br.com.plusapps.plusfisio.core.domain.Result
 import br.com.plusapps.plusfisio.features.auth.domain.AuthError
 import br.com.plusapps.plusfisio.features.auth.domain.AuthRepository
@@ -40,7 +43,8 @@ class FirebaseAuthRepository : AuthRepository {
                 userId = currentUser.uid,
                 email = currentUser.email.orEmpty(),
                 displayName = currentUser.displayName,
-                studioId = null
+                studioId = null,
+                role = null
             )
         } catch (_: Exception) {
             null
@@ -58,24 +62,30 @@ class FirebaseAuthRepository : AuthRepository {
             userId = user.uid,
             email = profile.email.ifBlank { user.email.orEmpty() },
             displayName = profile.displayName ?: user.displayName,
-            studioId = profile.studioId
+            studioId = profile.studioId,
+            role = profile.role
         )
     }
 
     private suspend fun upsertAndReadUserProfile(
         user: dev.gitlive.firebase.auth.FirebaseUser
     ): UserProfileDocument {
-        val reference = firestore.collection(USERS_COLLECTION).document(user.uid)
+        val reference = firestore.collection(FirestoreCollections.USERS).document(user.uid)
         val snapshot = reference.get()
 
         if (snapshot.exists) {
             return snapshot.data<UserProfileDocument>().mergeWith(user)
         }
 
+        val now = currentEpochMillis()
         val profile = UserProfileDocument(
+            userId = user.uid,
             email = user.email.orEmpty(),
             displayName = user.displayName,
-            studioId = null
+            studioId = null,
+            role = null,
+            createdAtEpochMillis = now,
+            updatedAtEpochMillis = now
         )
         reference.set(profile)
         return profile
@@ -85,21 +95,22 @@ class FirebaseAuthRepository : AuthRepository {
         user: dev.gitlive.firebase.auth.FirebaseUser
     ): UserProfileDocument {
         return copy(
+            userId = userId.ifBlank { user.uid },
             email = email.ifBlank { user.email.orEmpty() },
             displayName = displayName ?: user.displayName
         )
-    }
-
-    private companion object {
-        const val USERS_COLLECTION = "users"
     }
 }
 
 @Serializable
 private data class UserProfileDocument(
+    val userId: String = "",
     val email: String = "",
     val displayName: String? = null,
-    val studioId: String? = null
+    val studioId: String? = null,
+    val role: StudioUserRole? = null,
+    val createdAtEpochMillis: Long = 0L,
+    val updatedAtEpochMillis: Long = 0L
 )
 
 private fun FirebaseAuthException.toAuthError(): AuthError {

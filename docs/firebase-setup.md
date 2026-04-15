@@ -110,7 +110,7 @@ Essa direcao reduz risco de vazamento entre tenants e deixa a modelagem legivel 
 
 As regras atuais assumem:
 
-1. O usuario autenticado pode ler e atualizar apenas `users/{uid}`.
+1. O usuario autenticado pode ler apenas `users/{uid}` e so pode atualizar `studioId` e `role` quando esses valores baterem com a membership real criada no bootstrap.
 2. O acesso aos dados internos do estudio depende de um documento de membership em `studios/{studioId}/members/{uid}`.
 3. O onboarding desta branch ainda e placeholder, entao a app shell autenticada nao pode criar `studios/{studioId}` nem `members/{uid}`.
 
@@ -190,3 +190,24 @@ Adicionar `Storage` quando houver necessidade real de:
 - foto de perfil
 - anexos simples
 - arquivos de suporte operacional
+
+## Firestore foundation update
+
+The project now has a canonical Firestore model for the MVP:
+
+- `users/{uid}`
+- `studios/{studioId}`
+- `studios/{studioId}/members/{uid}`
+- `studios/{studioId}/clients/{clientId}`
+- `studios/{studioId}/appointments/{appointmentId}`
+- `studios/{studioId}/packages/{packageId}`
+- `studios/{studioId}/packageLedger/{entryId}`
+- `studios/{studioId}/payments/{paymentId}`
+
+The onboarding flow is now responsible for materializing the tenant:
+
+1. create `studios/{studioId}`
+2. create `members/{uid}`
+3. update `users/{uid}` with `studioId` and `role`
+
+This keeps the backend ready for the MVP without creating demo operational data.
