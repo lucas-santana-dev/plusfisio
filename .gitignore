@@ -15,8 +15,12 @@ captures
 !*.xcodeproj/xcshareddata/
 !*.xcodeproj/project.xcworkspace/
 !*.xcworkspace/contents.xcworkspacedata
+!*.xcworkspace/xcshareddata/
+!*.xcworkspace/xcshareddata/swiftpm/
+!*.xcworkspace/xcshareddata/swiftpm/Package.resolved
 **/xcshareddata/WorkspaceSettings.xcsettings
 node_modules/
 .firebase/
 composeApp/google-services.json
 iosApp/iosApp/GoogleService-Info.plist
+iosApp/Configuration/Config.local.xcconfig

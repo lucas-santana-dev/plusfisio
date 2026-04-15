@@ -34,6 +34,18 @@ O repositorio esta vinculado a esse projeto por meio do arquivo `.firebaserc`.
 - Firebase app id: `1:609787046500:ios:b676dccd1d679e5c444d71`
 - config local: `iosApp/iosApp/GoogleService-Info.plist`
 
+## Integracao iOS no repositorio
+
+O projeto iOS agora referencia o Firebase Apple SDK diretamente no `iosApp.xcodeproj` via Swift Package Manager.
+
+Produtos atualmente vinculados ao target:
+
+- `FirebaseCore`
+- `FirebaseAuth`
+- `FirebaseFirestore`
+
+O arquivo `GoogleService-Info.plist` continua local e fora do Git.
+
 ## Ajuste feito no projeto iOS
 
 O arquivo `iosApp/Configuration/Config.xcconfig` foi ajustado para usar um bundle identifier fixo:
@@ -171,10 +183,11 @@ firebase projects:list
 
 - Os arquivos `composeApp/google-services.json` e `iosApp/iosApp/GoogleService-Info.plist` foram adicionados localmente e estao no `.gitignore`.
 - O provider `Email/Password` ainda precisa estar habilitado no console do Firebase Authentication.
-- O projeto iOS foi preparado com `GoogleService-Info.plist` e `FirebaseApp.configure()`, mas a vinculacao do SDK nativo da Apple ainda depende de abrir o projeto no Xcode e adicionar os pacotes Firebase.
-- O `iOSApp.swift` agora protege o import de `FirebaseCore` com `#if canImport(FirebaseCore)`, evitando quebra local enquanto o pacote nativo ainda nao foi adicionado no Xcode.
+- O projeto iOS ja inclui o Firebase Apple SDK via Swift Package Manager; o passo manual remanescente no Mac e apenas fornecer `GoogleService-Info.plist` local e configurar assinatura.
 - Se o onboarding inicial do estudio ainda nao estiver definido, o usuario autenticado continuara caindo no fluxo de onboarding com `studioId = null`.
 - As regras atuais bloqueiam a autoassociacao do usuario a um tenant para preservar o isolamento multi-tenant ate a entrega do onboarding real.
+
+Para o passo a passo completo no Mac, ver `docs/ios-setup.md`.
 
 ## Quando expandir a configuracao
 
