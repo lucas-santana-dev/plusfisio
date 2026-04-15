@@ -23,8 +23,10 @@ class FirebaseStudioBootstrapRepository : StudioBootstrapRepository {
     override suspend fun bootstrapStudio(input: BootstrapStudioInput): EmptyResult<OnboardingError> {
         val currentUser = auth.currentUser ?: return Result.Failure(OnboardingError.UserNotAuthenticated)
         val now = currentEpochMillis()
-        val studioId = "studio_${currentUser.uid.take(8)}_$now"
+        val studioId = stableStudioIdFor(currentUser.uid)
         val studioReference = firestore.collection(FirestoreCollections.STUDIOS).document(studioId)
+        val memberReference = studioReference.collection(FirestoreCollections.MEMBERS).document(currentUser.uid)
+        val userProfileReference = firestore.collection(FirestoreCollections.USERS).document(currentUser.uid)
 
         val studioDocument = StudioDocument(
             studioId = studioId,
@@ -59,19 +61,55 @@ class FirebaseStudioBootstrapRepository : StudioBootstrapRepository {
         )
 
         return try {
-            studioReference.set(studioDocument)
-            studioReference.collection(FirestoreCollections.MEMBERS)
-                .document(currentUser.uid)
-                .set(memberDocument)
-            firestore.collection(FirestoreCollections.USERS)
-                .document(currentUser.uid)
-                .set(userProfileDocument)
+            val existingProfileSnapshot = userProfileReference.get()
+            if (existingProfileSnapshot.exists) {
+                val existingProfile = existingProfileSnapshot.data<UserProfileDocument>()
+                if (existingProfile.studioId == studioId) {
+                    ensureBootstrapDocuments(
+                        studioReference = studioReference,
+                        memberReference = memberReference,
+                        userProfileReference = userProfileReference,
+                        studioDocument = studioDocument,
+                        memberDocument = memberDocument,
+                        userProfileDocument = userProfileDocument
+                    )
+                    return Result.Success(Unit)
+                }
+            }
+
+            ensureBootstrapDocuments(
+                studioReference = studioReference,
+                memberReference = memberReference,
+                userProfileReference = userProfileReference,
+                studioDocument = studioDocument,
+                memberDocument = memberDocument,
+                userProfileDocument = userProfileDocument
+            )
             Result.Success(Unit)
         } catch (error: FirebaseFirestoreException) {
             Result.Failure(error.toOnboardingError())
         } catch (_: Exception) {
             Result.Failure(OnboardingError.Unknown)
         }
+    }
+
+    private suspend fun ensureBootstrapDocuments(
+        studioReference: dev.gitlive.firebase.firestore.DocumentReference,
+        memberReference: dev.gitlive.firebase.firestore.DocumentReference,
+        userProfileReference: dev.gitlive.firebase.firestore.DocumentReference,
+        studioDocument: StudioDocument,
+        memberDocument: StudioMemberDocument,
+        userProfileDocument: UserProfileDocument
+    ) {
+        if (!studioReference.get().exists) {
+            studioReference.set(studioDocument)
+        }
+
+        if (!memberReference.get().exists) {
+            memberReference.set(memberDocument)
+        }
+
+        userProfileReference.set(userProfileDocument)
     }
 }
 
@@ -111,6 +149,8 @@ private data class UserProfileDocument(
     val createdAtEpochMillis: Long,
     val updatedAtEpochMillis: Long
 )
+
+private fun stableStudioIdFor(userId: String): String = "studio_${userId.take(12)}"
 
 private fun FirebaseFirestoreException.toOnboardingError(): OnboardingError {
     val normalizedMessage = message?.lowercase().orEmpty()
