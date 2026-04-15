@@ -1,0 +1,65 @@
+name: Story
+description: Create a user-facing story with acceptance criteria.
+title: "[Story] "
+labels:
+  - "type: story"
+body:
+  - type: input
+    id: user_story
+    attributes:
+      label: User Story
+      description: Describe the story from the product perspective.
+      placeholder: Como profissional, quero confirmar um atendimento pela agenda para reduzir faltas.
+    validations:
+      required: true
+  - type: textarea
+    id: outcome
+    attributes:
+      label: Expected Outcome
+      description: What should be true after this story is delivered?
+      placeholder: O usuário consegue confirmar o atendimento em poucos toques e o status fica atualizado no sistema.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance Criteria
+      description: List objective acceptance criteria.
+      placeholder: |
+        - usuário consegue abrir o detalhe do agendamento
+        - usuário consegue confirmar manualmente
+        - status fica visível na agenda
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies
+    attributes:
+      label: Dependencies
+      description: Reference related epics, stories, or technical prerequisites.
+      placeholder: Depende da story de agenda diária e do modelo de appointment.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Auth
+        - Onboarding
+        - Home
+        - Agenda
+        - Clientes
+        - Pacotes
+        - Financeiro
+        - Core
+        - Infra
+    validations:
+      required: true
+  - type: input
+    id: milestone
+    attributes:
+      label: Milestone
+      placeholder: M3 - Core de valor
+  - type: input
+    id: target_release
+    attributes:
+      label: Target Release
+      placeholder: v0.2.0
