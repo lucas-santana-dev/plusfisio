@@ -11,7 +11,7 @@
     <string name="auth_forgot_password">Esqueci a senha</string>
     <string name="auth_login_button">Entrar</string>
     <string name="auth_login_loading">Entrando...</string>
-    <string name="auth_login_placeholder_info">Nesta fase inicial, a interface ja esta pronta e a autenticacao real sera conectada nas proximas etapas.</string>
+    <string name="auth_login_placeholder_info">A autenticacao por Firebase ja esta conectada. Use uma conta criada no Firebase Authentication para entrar.</string>
     <string name="auth_highlight_title">Primeiro acesso do dia</string>
     <string name="auth_highlight_description">Agenda, confirmacoes e cobranca simples em um fluxo pensado para uso rapido no celular.</string>
     <string name="auth_splash_subtitle">Sua operacao clinica mais simples, leve e organizada desde a abertura do dia.</string>
@@ -20,6 +20,25 @@
     <string name="auth_error_email_invalid">Digite um e-mail valido.</string>
     <string name="auth_error_password_required">Informe sua senha.</string>
     <string name="auth_error_password_short">A senha precisa ter pelo menos 6 caracteres.</string>
-    <string name="auth_event_login_pending">A autenticacao sera conectada nas proximas etapas do MVP.</string>
-    <string name="auth_event_forgot_password_pending">A recuperacao de senha sera adicionada quando o fluxo real de login estiver conectado.</string>
+    <string name="auth_event_forgot_password_pending">Crie ou gerencie a recuperacao de senha direto no Firebase Authentication nesta etapa inicial.</string>
+    <string name="auth_error_invalid_credentials">Nao foi possivel entrar com esse e-mail e senha.</string>
+    <string name="auth_error_provider_disabled">O login por e-mail e senha ainda nao esta habilitado no Firebase Authentication deste projeto.</string>
+    <string name="auth_error_network">Falha de conexao. Tente novamente em instantes.</string>
+    <string name="auth_error_unknown">Ocorreu um erro inesperado ao entrar.</string>
+    <string name="onboarding_placeholder_title">Configure seu negocio para continuar</string>
+    <string name="onboarding_placeholder_body">Sua autenticacao ja esta funcionando. O proximo passo e cadastrar o estudio ou clinica e vincular o studioId da sua conta.</string>
+    <string name="onboarding_placeholder_email">Conta autenticada: %1$s</string>
+    <string name="onboarding_placeholder_cta">Preparar onboarding</string>
+    <string name="onboarding_placeholder_sign_out">Sair da conta</string>
+    <string name="home_template_greeting">Bom ter voce aqui, %1$s.</string>
+    <string name="home_template_title">Home operacional</string>
+    <string name="home_template_dashboard">Template inicial da area autenticada, pronto para receber agenda, pendencias do dia e acoes rapidas do MVP.</string>
+    <string name="home_template_summary">Resumo do dia</string>
+    <string name="home_template_agenda">Agenda de hoje</string>
+    <string name="home_template_confirmations">Confirmacoes pendentes</string>
+    <string name="home_template_finance">Cobrancas proximas</string>
+    <string name="home_template_empty">Template pronto. Os dados reais entram nas proximas tasks do MVP.</string>
+    <string name="home_template_cta_primary">Criar proxima entrega da home</string>
+    <string name="home_template_cta_secondary">A base visual e o gate autenticado ja estao prontos para conectar agenda, confirmacoes e cobranca simples sem retrabalho de shell.</string>
+    <string name="home_template_sign_out">Sair</string>
 </resources>

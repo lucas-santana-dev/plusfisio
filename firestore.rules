@@ -1,0 +1,50 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwnUser(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function studioMembershipDoc(studioId) {
+      return /databases/$(database)/documents/studios/$(studioId)/members/$(request.auth.uid);
+    }
+
+    function isStudioMember(studioId) {
+      return isSignedIn()
+        && studioId is string
+        && exists(studioMembershipDoc(studioId));
+    }
+
+    function validOwnUserWrite(userId) {
+      return request.resource.data.email is string
+        && (
+          !("studioId" in request.resource.data)
+          || request.resource.data.studioId == null
+        );
+    }
+
+    match /users/{userId} {
+      allow read, create, update: if isOwnUser(userId) && validOwnUserWrite(userId);
+      allow delete: if false;
+    }
+
+    match /studios/{studioId} {
+      allow read: if isStudioMember(studioId);
+      allow create, update, delete: if false;
+
+      match /{document=**} {
+        allow read: if isStudioMember(studioId);
+        allow create, update, delete: if false;
+      }
+
+      match /members/{userId} {
+        allow read: if isStudioMember(studioId) || isOwnUser(userId);
+        allow create, update, delete: if false;
+      }
+    }
+  }
+}

@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Project Management Guide
+    url: https://github.com/lucas-santana-dev/plusfisio/blob/main/docs/project-management.md
+    about: Use the project management guide before creating a new issue.

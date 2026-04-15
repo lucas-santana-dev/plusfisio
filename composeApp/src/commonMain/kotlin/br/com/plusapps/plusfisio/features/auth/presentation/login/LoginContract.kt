@@ -35,4 +35,5 @@ sealed interface LoginAction {
  */
 sealed interface LoginEvent {
     data class ShowMessage(val message: UiText) : LoginEvent
+    data object Authenticated : LoginEvent
 }

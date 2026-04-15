@@ -257,3 +257,35 @@ Essa abordagem reduz risco, custo e dependência externa no começo.
 - WhatsApp via deep link
 - multi-tenant por `studioId`
 - Android primeiro, iOS em seguida
+
+## Auth Foundation Implemented
+
+The project now has an initial authenticated app shell in `commonMain`.
+
+Implemented routes:
+
+- `Splash`
+- `Login`
+- `Onboarding placeholder`
+- `Home template`
+
+The route is decided by the current `AuthSession`:
+
+- no session -> login
+- session with `studioId == null` -> onboarding placeholder
+- session with `studioId != null` -> home template
+
+Shared contracts added:
+
+- `AuthSession`
+- `AuthRepository`
+- `AuthError`
+- `SignInUseCase`
+- `ObserveAuthSessionUseCase`
+- `SignOutUseCase`
+
+Current provider:
+
+- `FirebaseAuthRepository` is now the default binding
+- it authenticates with Firebase Auth and resolves `AuthSession` using `users/{uid}` in Firestore
+- if `studioId` is missing, the authenticated user is routed to onboarding placeholder

@@ -1,0 +1,70 @@
+name: Epic
+description: Create a product-level epic for a major MVP capability.
+title: "[Epic] "
+labels:
+  - "type: epic"
+body:
+  - type: input
+    id: summary
+    attributes:
+      label: Summary
+      description: Name the epic in one clear sentence.
+      placeholder: Home operacional do dia
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / Opportunity
+      description: What business or product need does this epic address?
+      placeholder: Estúdios pequenos precisam visualizar e agir sobre o dia sem navegar por várias telas.
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: Expected Value
+      description: What outcome should this epic unlock for the MVP?
+      placeholder: Permitir operação rápida do dia em poucos toques no celular.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Included Scope
+      description: List the main stories or capabilities inside this epic.
+      placeholder: |
+        - mostrar atendimentos do dia
+        - destacar pendências
+        - abrir ações rápidas
+    validations:
+      required: true
+  - type: textarea
+    id: out_of_scope
+    attributes:
+      label: Out of Scope
+      description: What will explicitly not be done in this epic?
+      placeholder: Dashboard analítico completo, relatórios avançados.
+  - type: textarea
+    id: exit_criteria
+    attributes:
+      label: Exit Criteria
+      description: What conditions must be true for this epic to be considered complete?
+      placeholder: |
+        - stories principais entregues
+        - fluxo validado em Android
+        - sem bloqueios críticos abertos
+    validations:
+      required: true
+  - type: input
+    id: milestone
+    attributes:
+      label: Milestone
+      description: Link this epic to the MVP milestone.
+      placeholder: M2 - Operação básica
+  - type: input
+    id: target_release
+    attributes:
+      label: Target Release
+      description: Optional target version for this epic.
+      placeholder: v0.2.0
