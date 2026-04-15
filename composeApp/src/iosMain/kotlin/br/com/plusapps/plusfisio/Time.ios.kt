@@ -1,5 +1,5 @@
 package br.com.plusapps.plusfisio
 
-import platform.Foundation.NSDate
+import kotlin.time.Clock
 
-actual fun currentEpochMillis(): Long = (NSDate().timeIntervalSince1970 * 1000.0).toLong()
+actual fun currentEpochMillis(): Long = Clock.System.now().toEpochMilliseconds()

@@ -45,13 +45,31 @@ service cloud.firestore {
       return resource.data.studioId == studioId;
     }
 
-    function validOwnUserWrite(userId) {
+    function validOwnUserCreate(userId) {
       return request.resource.data.userId == userId
         && request.resource.data.email is string
+        && request.resource.data.studioId == null
+        && request.resource.data.role == null;
+    }
+
+    function validOwnUserUpdate(userId) {
+      return request.resource.data.userId == resource.data.userId
+        && request.resource.data.email is string
+        && request.resource.data.createdAtEpochMillis == resource.data.createdAtEpochMillis
         && (
-          !('studioId' in request.resource.data)
-          || request.resource.data.studioId == null
-          || isStudioMember(request.resource.data.studioId)
+          (
+            request.resource.data.studioId == null
+            && request.resource.data.role == null
+          )
+          || (
+            request.resource.data.studioId is string
+            && isStudioMember(request.resource.data.studioId)
+            && (
+              resource.data.studioId == null
+              || request.resource.data.studioId == resource.data.studioId
+            )
+            && request.resource.data.role == get(currentMembershipDoc(request.resource.data.studioId)).data.role
+          )
         );
     }
 
@@ -83,7 +101,9 @@ service cloud.firestore {
     }
 
     match /users/{userId} {
-      allow read, create, update: if isOwnUser(userId) && validOwnUserWrite(userId);
+      allow read: if isOwnUser(userId);
+      allow create: if isOwnUser(userId) && validOwnUserCreate(userId);
+      allow update: if isOwnUser(userId) && validOwnUserUpdate(userId);
       allow delete: if false;
     }
 

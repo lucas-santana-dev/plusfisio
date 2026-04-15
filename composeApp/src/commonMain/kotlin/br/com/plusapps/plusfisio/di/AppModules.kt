@@ -5,9 +5,9 @@ import br.com.plusapps.plusfisio.features.auth.presentation.authPresentationModu
 import br.com.plusapps.plusfisio.features.onboarding.data.onboardingDataModule
 import br.com.plusapps.plusfisio.features.onboarding.presentation.onboardingPresentationModule
 import br.com.plusapps.plusfisio.root.presentation.rootPresentationModule
-import org.koin.core.context.GlobalContext
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
+import org.koin.mp.KoinPlatform
 
 private val appModules: List<Module> = listOf(
     authDataModule,
@@ -18,7 +18,7 @@ private val appModules: List<Module> = listOf(
 )
 
 fun initKoin() {
-    if (GlobalContext.getOrNull() != null) {
+    if (KoinPlatform.getKoinOrNull() != null) {
         return
     }
 

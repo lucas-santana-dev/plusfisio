@@ -110,7 +110,7 @@ Essa direcao reduz risco de vazamento entre tenants e deixa a modelagem legivel 
 
 As regras atuais assumem:
 
-1. O usuario autenticado pode ler e atualizar apenas `users/{uid}`.
+1. O usuario autenticado pode ler apenas `users/{uid}` e so pode atualizar `studioId` e `role` quando esses valores baterem com a membership real criada no bootstrap.
 2. O acesso aos dados internos do estudio depende de um documento de membership em `studios/{studioId}/members/{uid}`.
 3. O bootstrap de estúdio pode ser feito pelo proprio usuario autenticado, criando o documento do estudio e seu membership inicial.
 
