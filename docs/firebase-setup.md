@@ -189,3 +189,24 @@ Adicionar `Storage` quando houver necessidade real de:
 - foto de perfil
 - anexos simples
 - arquivos de suporte operacional
+
+## Firestore foundation update
+
+The project now has a canonical Firestore model for the MVP:
+
+- `users/{uid}`
+- `studios/{studioId}`
+- `studios/{studioId}/members/{uid}`
+- `studios/{studioId}/clients/{clientId}`
+- `studios/{studioId}/appointments/{appointmentId}`
+- `studios/{studioId}/packages/{packageId}`
+- `studios/{studioId}/packageLedger/{entryId}`
+- `studios/{studioId}/payments/{paymentId}`
+
+The onboarding flow is now responsible for materializing the tenant:
+
+1. create `studios/{studioId}`
+2. create `members/{uid}`
+3. update `users/{uid}` with `studioId` and `role`
+
+This keeps the backend ready for the MVP without creating demo operational data.

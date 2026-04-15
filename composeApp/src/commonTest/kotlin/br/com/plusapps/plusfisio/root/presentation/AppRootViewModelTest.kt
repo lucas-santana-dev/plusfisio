@@ -1,6 +1,7 @@
 package br.com.plusapps.plusfisio.root.presentation
 
 import br.com.plusapps.plusfisio.core.domain.Result
+import br.com.plusapps.plusfisio.core.domain.model.StudioUserRole
 import br.com.plusapps.plusfisio.features.auth.domain.AuthError
 import br.com.plusapps.plusfisio.features.auth.domain.AuthRepository
 import br.com.plusapps.plusfisio.features.auth.domain.AuthSession
@@ -54,7 +55,8 @@ class AppRootViewModelTest {
             userId = "user-setup",
             email = "setup@plusfisio.com",
             displayName = "Bruno",
-            studioId = null
+            studioId = null,
+            role = null
         )
         val repository = RootAuthRepositoryForTest(currentSession = session)
 
@@ -74,7 +76,8 @@ class AppRootViewModelTest {
             userId = "user-owner",
             email = "owner@plusfisio.com",
             displayName = "Camila",
-            studioId = "studio-1"
+            studioId = "studio-1",
+            role = StudioUserRole.OwnerAdmin
         )
         val repository = RootAuthRepositoryForTest(currentSession = session)
 

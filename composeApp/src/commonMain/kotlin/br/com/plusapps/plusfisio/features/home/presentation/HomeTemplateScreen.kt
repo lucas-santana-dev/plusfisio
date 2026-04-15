@@ -175,7 +175,8 @@ private fun HomeTemplateScreenPreview() {
                 userId = "1",
                 email = "owner@plusfisio.com",
                 displayName = "Camila Rocha",
-                studioId = "studio-demo"
+                studioId = "studio-demo",
+                role = br.com.plusapps.plusfisio.core.domain.model.StudioUserRole.OwnerAdmin
             ),
             onSignOutClick = {}
         )

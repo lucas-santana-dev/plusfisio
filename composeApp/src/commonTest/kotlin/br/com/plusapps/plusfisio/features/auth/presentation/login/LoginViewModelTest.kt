@@ -1,6 +1,7 @@
 package br.com.plusapps.plusfisio.features.auth.presentation.login
 
 import app.cash.turbine.test
+import br.com.plusapps.plusfisio.core.domain.model.StudioUserRole
 import br.com.plusapps.plusfisio.core.domain.Result
 import br.com.plusapps.plusfisio.features.auth.domain.AuthError
 import br.com.plusapps.plusfisio.features.auth.domain.AuthRepository
@@ -60,7 +61,8 @@ class LoginViewModelTest {
                     userId = "user-1",
                     email = "owner@plusfisio.com",
                     displayName = "Camila",
-                    studioId = "studio-1"
+                    studioId = "studio-1",
+                    role = StudioUserRole.OwnerAdmin
                 )
             )
         )
@@ -106,7 +108,8 @@ class LoginViewModelTest {
                     userId = "user-1",
                     email = "owner@plusfisio.com",
                     displayName = "Camila",
-                    studioId = "studio-1"
+                    studioId = "studio-1",
+                    role = StudioUserRole.OwnerAdmin
                 )
             ),
             pendingGate = gate
@@ -133,7 +136,8 @@ private class FakeAuthRepositoryForTest(
             userId = "default-user",
             email = "owner@plusfisio.com",
             displayName = "Camila",
-            studioId = "studio-1"
+            studioId = "studio-1",
+            role = StudioUserRole.OwnerAdmin
         )
     ),
     private val pendingGate: CompletableDeferred<Unit>? = null
