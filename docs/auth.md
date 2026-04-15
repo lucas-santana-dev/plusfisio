@@ -94,11 +94,14 @@ iOS already has:
 
 - `GoogleService-Info.plist`
 - fixed bundle identifier
-- guarded `FirebaseApp.configure()` in `iOSApp.swift`
+- native Firebase Apple SDK integrated via Swift Package Manager
+- direct `FirebaseApp.configure()` in `iOSApp.swift`
 
-What still depends on Xcode:
+Local setup on macOS still requires:
 
-- adding the native Firebase Apple package so `FirebaseCore` is available in the project
+- local `GoogleService-Info.plist`
+- local `TEAM_ID` override via `Config.local.xcconfig`
+- opening `iosApp.xcodeproj` in Xcode so SwiftPM can resolve packages
 
 ## Test coverage
 
