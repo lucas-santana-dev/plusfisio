@@ -1,4 +1,5 @@
 [versions]
+firebaseBom = "34.1.0"
 agp = "8.11.2"
 android-compileSdk = "36"
 android-minSdk = "24"
@@ -47,7 +48,7 @@ firebase-auth = { module = "dev.gitlive:firebase-auth", version.ref = "firebaseG
 firebase-firestore = { module = "dev.gitlive:firebase-firestore", version.ref = "firebaseGitLive" }
 kotlinx-coroutines-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "coroutines" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
-
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }

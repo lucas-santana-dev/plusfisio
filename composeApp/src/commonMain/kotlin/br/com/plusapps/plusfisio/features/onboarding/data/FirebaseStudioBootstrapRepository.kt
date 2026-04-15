@@ -129,14 +129,8 @@ class FirebaseStudioBootstrapRepository : StudioBootstrapRepository {
         memberDocument: StudioMemberDocument,
         userProfileDocument: UserProfileDocument
     ) {
-        if (!studioReference.get().exists) {
-            studioReference.set(studioDocument)
-        }
-
-        if (!memberReference.get().exists) {
-            memberReference.set(memberDocument)
-        }
-
+        studioReference.set(studioDocument)
+        memberReference.set(memberDocument)
         userProfileReference.set(userProfileDocument)
     }
 }
