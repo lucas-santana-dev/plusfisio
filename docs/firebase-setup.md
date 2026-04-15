@@ -84,13 +84,13 @@ Isso permite testar autenticacao e regras sem depender imediatamente do ambiente
 
 ## Estrategia de seguranca adotada
 
-As regras do Firestore seguem uma direcao simples para o MVP:
+As regras do Firestore seguem uma direcao simples para esta etapa:
 
-- todos os dados de negocio ficam abaixo de `studios/{studioId}`
+- todos os dados de negocio continuam planejados abaixo de `studios/{studioId}`
 - o perfil do usuario autenticado fica em `users/{uid}`
-- leitura e escrita exigem usuario autenticado
-- o usuario precisa pertencer ao estudio acessado para ler e escrever dados internos do estudio
-- o `studioId` do documento deve ser compativel com o `studioId` do caminho
+- leitura e escrita do proprio perfil exigem usuario autenticado
+- leitura de dados internos do estudio exige membership existente
+- enquanto o onboarding real ainda nao existir nesta branch, a criacao de `studios` e `members` fica bloqueada nas regras
 
 ### Estrutura esperada
 
@@ -112,7 +112,7 @@ As regras atuais assumem:
 
 1. O usuario autenticado pode ler apenas `users/{uid}` e so pode atualizar `studioId` e `role` quando esses valores baterem com a membership real criada no bootstrap.
 2. O acesso aos dados internos do estudio depende de um documento de membership em `studios/{studioId}/members/{uid}`.
-3. O bootstrap de estúdio pode ser feito pelo proprio usuario autenticado, criando o documento do estudio e seu membership inicial.
+3. O onboarding desta branch ainda e placeholder, entao a app shell autenticada nao pode criar `studios/{studioId}` nem `members/{uid}`.
 
 Sem membership, o usuario continua autenticado, mas fica fora da area de dados do estudio e cai no onboarding.
 
@@ -174,6 +174,7 @@ firebase projects:list
 - O projeto iOS foi preparado com `GoogleService-Info.plist` e `FirebaseApp.configure()`, mas a vinculacao do SDK nativo da Apple ainda depende de abrir o projeto no Xcode e adicionar os pacotes Firebase.
 - O `iOSApp.swift` agora protege o import de `FirebaseCore` com `#if canImport(FirebaseCore)`, evitando quebra local enquanto o pacote nativo ainda nao foi adicionado no Xcode.
 - Se o onboarding inicial do estudio ainda nao estiver definido, o usuario autenticado continuara caindo no fluxo de onboarding com `studioId = null`.
+- As regras atuais bloqueiam a autoassociacao do usuario a um tenant para preservar o isolamento multi-tenant ate a entrega do onboarding real.
 
 ## Quando expandir a configuracao
 

@@ -1,0 +1,55 @@
+name: Task
+description: Create a technical task that supports a story or release.
+title: "[Task] "
+labels:
+  - "type: task"
+body:
+  - type: input
+    id: objective
+    attributes:
+      label: Objective
+      description: What technical work needs to be done?
+      placeholder: Implementar ViewModel e estado da tela de agenda diária.
+    validations:
+      required: true
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Why is this task needed and where does it fit?
+      placeholder: Necessário para suportar a story de agenda diária do MVP.
+    validations:
+      required: true
+  - type: textarea
+    id: definition_of_done
+    attributes:
+      label: Definition of Done
+      description: What must be complete for this task to be closed?
+      placeholder: |
+        - estado e ações definidos
+        - ViewModel implementada
+        - preview ou teste relevante revisado
+    validations:
+      required: true
+  - type: input
+    id: parent_story
+    attributes:
+      label: Parent Story
+      description: Reference the story or epic this task belongs to.
+      placeholder: #23
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Auth
+        - Onboarding
+        - Home
+        - Agenda
+        - Clientes
+        - Pacotes
+        - Financeiro
+        - Core
+        - Infra
+    validations:
+      required: true
