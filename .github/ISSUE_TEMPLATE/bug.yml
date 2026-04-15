@@ -1,0 +1,63 @@
+name: Bug
+description: Report a defect affecting current behavior.
+title: "[Bug] "
+labels:
+  - "type: bug"
+body:
+  - type: textarea
+    id: current_behavior
+    attributes:
+      label: Current Behavior
+      description: What is happening now?
+      placeholder: Ao abrir a agenda semanal, a lista aparece vazia mesmo com atendimentos cadastrados.
+    validations:
+      required: true
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior
+      description: What should happen instead?
+      placeholder: A agenda semanal deve listar os atendimentos do período selecionado.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to Reproduce
+      description: List the minimum steps needed to reproduce the issue.
+      placeholder: |
+        1. Abrir agenda
+        2. Alternar para visão semanal
+        3. Observar a ausência de itens
+    validations:
+      required: true
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact
+      description: Describe the user or product impact.
+      placeholder: Impede operação normal da agenda e bloqueia validação do fluxo.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Add logs, screenshots, or notes if available.
+      placeholder: Stacktrace, print da tela ou detalhes do ambiente.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - Auth
+        - Onboarding
+        - Home
+        - Agenda
+        - Clientes
+        - Pacotes
+        - Financeiro
+        - Core
+        - Infra
+    validations:
+      required: true
