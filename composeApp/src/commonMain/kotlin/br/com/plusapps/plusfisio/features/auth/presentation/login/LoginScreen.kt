@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -35,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import br.com.plusapps.plusfisio.core.presentation.text.UiText
 import br.com.plusapps.plusfisio.core.presentation.text.asString
+import br.com.plusapps.plusfisio.core.presentation.theme.PlusFisio
 import br.com.plusapps.plusfisio.core.presentation.theme.PlusFisioTheme
 import br.com.plusapps.plusfisio.features.auth.presentation.components.AuthBackground
 import br.com.plusapps.plusfisio.features.auth.presentation.components.AuthBranding
@@ -72,13 +72,15 @@ fun LoginScreen(
     onAction: (LoginAction) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
+    val spacing = PlusFisio.spacing
+
     AuthBackground(contentPadding = contentPadding) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .safeDrawingPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 24.dp),
+                .padding(horizontal = spacing.screenHorizontal, vertical = spacing.screenVertical),
             verticalArrangement = Arrangement.Center
         ) {
             AuthBranding(
@@ -86,7 +88,7 @@ fun LoginScreen(
                 title = stringResource(Res.string.auth_brand_name),
                 subtitle = stringResource(Res.string.auth_login_brand_subtitle)
             )
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(spacing.grid7))
             LoginCard(
                 state = state,
                 onAction = onAction
@@ -100,24 +102,26 @@ private fun LoginCard(
     state: LoginState,
     onAction: (LoginAction) -> Unit
 ) {
+    val spacing = PlusFisio.spacing
+
     AuthPrimaryCard {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 24.dp)
+                .padding(horizontal = spacing.grid5, vertical = spacing.grid6)
         ) {
             Text(
                 text = stringResource(Res.string.auth_login_title),
                 style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(spacing.grid2))
             Text(
                 text = stringResource(Res.string.auth_login_description),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(spacing.sectionGap))
             OutlinedTextField(
                 value = state.email,
                 onValueChange = { onAction(LoginAction.OnEmailChanged(it)) },
@@ -128,7 +132,7 @@ private fun LoginCard(
                 isError = state.emailError != null,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
             )
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(spacing.contentGap))
             OutlinedTextField(
                 value = state.password,
                 onValueChange = { onAction(LoginAction.OnPasswordChanged(it)) },
@@ -155,14 +159,14 @@ private fun LoginCard(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
                             ) { onAction(LoginAction.OnTogglePasswordVisibility) }
-                            .padding(horizontal = 8.dp, vertical = 6.dp),
+                            .padding(horizontal = spacing.grid2, vertical = spacing.grid1 + spacing.grid1 / 2),
                         style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.primary
+                        color = PlusFisio.colors.brand
                     )
                 },
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
             )
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(spacing.grid3))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
@@ -171,13 +175,13 @@ private fun LoginCard(
                     Text(stringResource(Res.string.auth_forgot_password))
                 }
             }
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(spacing.grid3))
             Button(
                 onClick = { onAction(LoginAction.OnLoginClicked) },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(54.dp),
-                shape = RoundedCornerShape(20.dp),
+                    .height(spacing.controlHeight),
+                shape = PlusFisio.shapes.control,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
@@ -192,14 +196,14 @@ private fun LoginCard(
                     style = MaterialTheme.typography.labelLarge
                 )
             }
-            Spacer(modifier = Modifier.height(18.dp))
+            Spacer(modifier = Modifier.height(spacing.blockGap))
             Text(
                 text = stringResource(Res.string.auth_login_placeholder_info),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Start
             )
-            Spacer(modifier = Modifier.height(22.dp))
+            Spacer(modifier = Modifier.height(spacing.grid6 - spacing.grid1 / 2))
             AuthHighlightCard(
                 title = stringResource(Res.string.auth_highlight_title),
                 description = stringResource(Res.string.auth_highlight_description)

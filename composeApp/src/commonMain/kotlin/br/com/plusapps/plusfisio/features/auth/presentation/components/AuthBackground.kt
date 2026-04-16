@@ -8,8 +8,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -17,6 +15,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import br.com.plusapps.plusfisio.core.presentation.theme.PlusFisio
 
 /**
  * Background compartilhado das telas de autenticacao.
@@ -30,15 +29,17 @@ fun AuthBackground(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
 ) {
+    val colors = PlusFisio.colors
+
     Box(
         modifier = modifier
             .fillMaxSize()
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        MaterialTheme.colorScheme.background,
-                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.45f),
-                        MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.35f)
+                        colors.canvas,
+                        colors.brandSoft,
+                        colors.canvas
                     )
                 )
             )
@@ -79,12 +80,12 @@ private fun BoxScope.AuthDecoration(
                 top = topPadding
             )
             .size(size)
-            .clip(if (rounded) RoundedCornerShape(34.dp) else CircleShape)
+            .clip(if (rounded) PlusFisio.shapes.panel else CircleShape)
             .background(
                 color = if (rounded) {
-                    MaterialTheme.colorScheme.tertiary.copy(alpha = 0.14f)
+                    PlusFisio.colors.line.copy(alpha = 0.35f)
                 } else {
-                    MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f)
+                    PlusFisio.colors.brandSoft.copy(alpha = 0.8f)
                 }
             )
     )
