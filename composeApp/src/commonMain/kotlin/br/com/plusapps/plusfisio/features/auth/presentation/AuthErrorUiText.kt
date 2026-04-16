@@ -6,6 +6,7 @@ import plusfisio.composeapp.generated.resources.Res
 import plusfisio.composeapp.generated.resources.auth_error_email_in_use
 import plusfisio.composeapp.generated.resources.auth_error_invalid_credentials
 import plusfisio.composeapp.generated.resources.auth_error_network
+import plusfisio.composeapp.generated.resources.auth_error_password_reset_failed
 import plusfisio.composeapp.generated.resources.auth_error_profile_setup_failed
 import plusfisio.composeapp.generated.resources.auth_error_provider_disabled
 import plusfisio.composeapp.generated.resources.auth_error_unknown
@@ -17,6 +18,7 @@ fun AuthError.toUiText(): UiText {
         AuthError.InvalidCredentials -> UiText.Resource(Res.string.auth_error_invalid_credentials)
         AuthError.WeakPassword -> UiText.Resource(Res.string.auth_error_weak_password)
         AuthError.ProfileSetupFailed -> UiText.Resource(Res.string.auth_error_profile_setup_failed)
+        AuthError.PasswordResetFailed -> UiText.Resource(Res.string.auth_error_password_reset_failed)
         AuthError.ProviderDisabled -> UiText.Resource(Res.string.auth_error_provider_disabled)
         AuthError.Network -> UiText.Resource(Res.string.auth_error_network)
         AuthError.Unknown -> UiText.Resource(Res.string.auth_error_unknown)

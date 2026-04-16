@@ -7,6 +7,7 @@ sealed interface AuthError : Error {
     data object EmailAlreadyInUse : AuthError
     data object WeakPassword : AuthError
     data object ProfileSetupFailed : AuthError
+    data object PasswordResetFailed : AuthError
     data object ProviderDisabled : AuthError
     data object Network : AuthError
     data object Unknown : AuthError

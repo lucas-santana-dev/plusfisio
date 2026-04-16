@@ -4,6 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.plusapps.plusfisio.core.domain.onFailure
 import br.com.plusapps.plusfisio.core.domain.onSuccess
+import br.com.plusapps.plusfisio.core.presentation.input.isValidBrazilPhone
+import br.com.plusapps.plusfisio.core.presentation.input.isValidEmail
+import br.com.plusapps.plusfisio.core.presentation.input.sanitizeEmail
 import br.com.plusapps.plusfisio.core.presentation.text.UiText
 import br.com.plusapps.plusfisio.features.auth.domain.SignUpUseCase
 import br.com.plusapps.plusfisio.features.auth.presentation.toUiText
@@ -23,6 +26,8 @@ import plusfisio.composeapp.generated.resources.auth_error_name_required
 import plusfisio.composeapp.generated.resources.auth_error_password_mismatch
 import plusfisio.composeapp.generated.resources.auth_error_password_required
 import plusfisio.composeapp.generated.resources.auth_error_password_short
+import plusfisio.composeapp.generated.resources.auth_error_whatsapp_invalid
+import plusfisio.composeapp.generated.resources.auth_error_whatsapp_required
 
 class SignUpViewModel(
     private val signUpUseCase: SignUpUseCase
@@ -45,6 +50,15 @@ class SignUpViewModel(
             is SignUpAction.OnEmailChanged -> {
                 _state.update { current ->
                     current.copy(email = action.value, emailError = null)
+                }
+            }
+
+            is SignUpAction.OnWhatsappChanged -> {
+                _state.update { current ->
+                    current.copy(
+                        whatsapp = action.value.filter(Char::isDigit).take(11),
+                        whatsappError = null
+                    )
                 }
             }
 
@@ -77,9 +91,14 @@ class SignUpViewModel(
         }
     }
 
+    fun resetState() {
+        _state.value = SignUpState()
+    }
+
     private fun submit() {
         val current = _state.value
         val nameError = validateName(current.name)
+        val whatsappError = validateWhatsapp(current.whatsapp)
         val emailError = validateEmail(current.email)
         val passwordError = validatePassword(current.password)
         val confirmPasswordError = validateConfirmPassword(
@@ -89,6 +108,7 @@ class SignUpViewModel(
 
         if (
             nameError != null ||
+            whatsappError != null ||
             emailError != null ||
             passwordError != null ||
             confirmPasswordError != null
@@ -96,6 +116,7 @@ class SignUpViewModel(
             _state.update {
                 it.copy(
                     nameError = nameError,
+                    whatsappError = whatsappError,
                     emailError = emailError,
                     passwordError = passwordError,
                     confirmPasswordError = confirmPasswordError
@@ -109,7 +130,8 @@ class SignUpViewModel(
 
             signUpUseCase(
                 name = current.name.trim(),
-                email = current.email.trim(),
+                whatsapp = current.whatsapp,
+                email = sanitizeEmail(current.email),
                 password = current.password
             ).onSuccess { session ->
                 _state.update { state -> state.copy(isLoading = false) }
@@ -128,7 +150,13 @@ class SignUpViewModel(
 
     private fun validateEmail(value: String): UiText? {
         if (value.isBlank()) return UiText.Resource(Res.string.auth_error_email_required)
-        if (!EMAIL_REGEX.matches(value.trim())) return UiText.Resource(Res.string.auth_error_email_invalid)
+        if (!isValidEmail(value)) return UiText.Resource(Res.string.auth_error_email_invalid)
+        return null
+    }
+
+    private fun validateWhatsapp(value: String): UiText? {
+        if (value.isBlank()) return UiText.Resource(Res.string.auth_error_whatsapp_required)
+        if (!isValidBrazilPhone(value)) return UiText.Resource(Res.string.auth_error_whatsapp_invalid)
         return null
     }
 
@@ -151,9 +179,5 @@ class SignUpViewModel(
         viewModelScope.launch {
             _events.send(event)
         }
-    }
-
-    private companion object {
-        val EMAIL_REGEX = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")
     }
 }

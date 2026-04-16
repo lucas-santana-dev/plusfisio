@@ -4,6 +4,8 @@ data class Studio(
     val studioId: String,
     val name: String,
     val businessType: BusinessType,
+    val teamSize: TeamSizeRange,
+    val cityState: String,
     val ownerUserId: String,
     val timezone: String,
     val phone: String,

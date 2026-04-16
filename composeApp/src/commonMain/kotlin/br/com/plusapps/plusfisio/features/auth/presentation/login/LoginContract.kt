@@ -39,4 +39,5 @@ sealed interface LoginEvent {
     data class ShowMessage(val message: UiText) : LoginEvent
     data class Authenticated(val session: AuthSession) : LoginEvent
     data object NavigateToSignUp : LoginEvent
+    data object NavigateToForgotPassword : LoginEvent
 }

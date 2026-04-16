@@ -7,10 +7,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.plusapps.plusfisio.features.auth.presentation.login.LoginRoot
+import br.com.plusapps.plusfisio.features.auth.presentation.forgotpassword.ForgotPasswordRoot
 import br.com.plusapps.plusfisio.features.auth.presentation.signup.SignUpRoot
 import br.com.plusapps.plusfisio.features.auth.presentation.splash.SplashScreen
 import br.com.plusapps.plusfisio.features.home.presentation.HomeTemplateScreen
-import br.com.plusapps.plusfisio.features.onboarding.presentation.OnboardingRoot
+import br.com.plusapps.plusfisio.features.onboarding.presentation.businesssetup.BusinessSetupRoot
+import br.com.plusapps.plusfisio.features.onboarding.presentation.welcome.WelcomeScreen
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
@@ -29,6 +31,7 @@ fun AppRoot(
                 LoginRoot(
                     onAuthenticated = viewModel::onLoginCompleted,
                     onNavigateToSignUp = viewModel::onSignUpRequested,
+                    onNavigateToForgotPassword = viewModel::onForgotPasswordRequested,
                     contentPadding = innerPadding
                 )
             }
@@ -41,10 +44,26 @@ fun AppRoot(
                 )
             }
 
-            state.route == AppRoute.Onboarding -> {
-                OnboardingRoot(
+            state.route == AppRoute.ForgotPassword -> {
+                ForgotPasswordRoot(
+                    onNavigateBack = viewModel::onLoginRequested,
+                    contentPadding = innerPadding
+                )
+            }
+
+            state.route == AppRoute.OnboardingWelcome -> {
+                WelcomeScreen(
+                    onBackClick = viewModel::onLoginRequested,
+                    onContinueClick = viewModel::onBusinessSetupRequested,
+                    contentPadding = innerPadding
+                )
+            }
+
+            state.route == AppRoute.OnboardingBusinessSetup -> {
+                BusinessSetupRoot(
                     session = requireNotNull(state.session),
                     onCompleted = viewModel::onOnboardingCompleted,
+                    onNavigateBack = viewModel::onOnboardingWelcomeRequested,
                     onSignOutClick = viewModel::onSignOut,
                     contentPadding = innerPadding
                 )

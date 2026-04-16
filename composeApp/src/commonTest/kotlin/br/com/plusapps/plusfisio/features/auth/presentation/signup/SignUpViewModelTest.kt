@@ -48,6 +48,7 @@ class SignUpViewModelTest {
 
         val state = viewModel.state.value
         assertNotNull(state.nameError)
+        assertNotNull(state.whatsappError)
         assertNotNull(state.emailError)
         assertNotNull(state.passwordError)
         assertNotNull(state.confirmPasswordError)
@@ -59,6 +60,7 @@ class SignUpViewModelTest {
         val viewModel = SignUpViewModel(SignUpUseCase(FakeSignUpAuthRepository()))
 
         viewModel.onAction(SignUpAction.OnNameChanged("Camila"))
+        viewModel.onAction(SignUpAction.OnWhatsappChanged("11999999999"))
         viewModel.onAction(SignUpAction.OnEmailChanged("owner@plusfisio.com"))
         viewModel.onAction(SignUpAction.OnPasswordChanged("123456"))
         viewModel.onAction(SignUpAction.OnConfirmPasswordChanged("654321"))
@@ -84,6 +86,7 @@ class SignUpViewModelTest {
         )
 
         viewModel.onAction(SignUpAction.OnNameChanged("Camila"))
+        viewModel.onAction(SignUpAction.OnWhatsappChanged("11999999999"))
         viewModel.onAction(SignUpAction.OnEmailChanged("owner@plusfisio.com"))
         viewModel.onAction(SignUpAction.OnPasswordChanged("123456"))
         viewModel.onAction(SignUpAction.OnConfirmPasswordChanged("123456"))
@@ -107,6 +110,7 @@ class SignUpViewModelTest {
         )
 
         viewModel.onAction(SignUpAction.OnNameChanged("Camila"))
+        viewModel.onAction(SignUpAction.OnWhatsappChanged("11999999999"))
         viewModel.onAction(SignUpAction.OnEmailChanged("owner@plusfisio.com"))
         viewModel.onAction(SignUpAction.OnPasswordChanged("123456"))
         viewModel.onAction(SignUpAction.OnConfirmPasswordChanged("123456"))
@@ -142,6 +146,7 @@ class SignUpViewModelTest {
         )
 
         viewModel.onAction(SignUpAction.OnNameChanged("Camila"))
+        viewModel.onAction(SignUpAction.OnWhatsappChanged("11999999999"))
         viewModel.onAction(SignUpAction.OnEmailChanged("owner@plusfisio.com"))
         viewModel.onAction(SignUpAction.OnPasswordChanged("123456"))
         viewModel.onAction(SignUpAction.OnConfirmPasswordChanged("123456"))
@@ -170,7 +175,12 @@ private class FakeSignUpAuthRepository(
     private val pendingGate: CompletableDeferred<Unit>? = null
 ) : AuthRepository {
 
-    override suspend fun signUp(name: String, email: String, password: String): Result<AuthSession, AuthError> {
+    override suspend fun signUp(
+        name: String,
+        whatsapp: String,
+        email: String,
+        password: String
+    ): Result<AuthSession, AuthError> {
         pendingGate?.await()
         return signUpResult
     }
@@ -180,6 +190,10 @@ private class FakeSignUpAuthRepository(
     }
 
     override suspend fun getCurrentSession(): AuthSession? = null
+
+    override suspend fun sendPasswordReset(email: String): Result<Unit, AuthError> {
+        return Result.Failure(AuthError.Unknown)
+    }
 
     override suspend fun signOut() = Unit
 }

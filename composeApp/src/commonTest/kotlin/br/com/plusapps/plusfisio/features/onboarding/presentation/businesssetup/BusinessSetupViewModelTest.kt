@@ -1,8 +1,9 @@
-package br.com.plusapps.plusfisio.features.onboarding.presentation
+package br.com.plusapps.plusfisio.features.onboarding.presentation.businesssetup
 
 import app.cash.turbine.test
 import br.com.plusapps.plusfisio.core.domain.Result
 import br.com.plusapps.plusfisio.core.domain.model.BusinessType
+import br.com.plusapps.plusfisio.core.domain.model.TeamSizeRange
 import br.com.plusapps.plusfisio.features.onboarding.domain.BootstrapStudioInput
 import br.com.plusapps.plusfisio.features.onboarding.domain.BootstrapStudioUseCase
 import br.com.plusapps.plusfisio.features.onboarding.domain.OnboardingError
@@ -26,7 +27,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class OnboardingViewModelTest {
+class BusinessSetupViewModelTest {
 
     private val dispatcher = StandardTestDispatcher()
 
@@ -42,44 +43,49 @@ class OnboardingViewModelTest {
 
     @Test
     fun `empty fields update onboarding errors`() = runTest(dispatcher) {
-        val viewModel = OnboardingViewModel(BootstrapStudioUseCase(FakeStudioBootstrapRepository()))
+        val viewModel = BusinessSetupViewModel(BootstrapStudioUseCase(FakeStudioBootstrapRepository()))
 
-        viewModel.onAction(OnboardingAction.OnSubmitClicked)
+        viewModel.onAction(BusinessSetupAction.OnSubmitClicked)
         advanceUntilIdle()
 
         val state = viewModel.state.value
-        assertNotNull(state.studioNameError)
-        assertNotNull(state.phoneError)
+        assertNotNull(state.businessNameError)
+        assertNotNull(state.businessTypeError)
+        assertNotNull(state.teamSizeError)
+        assertNotNull(state.cityStateError)
         assertFalse(state.isSubmitting)
     }
 
     @Test
     fun `successful bootstrap emits completed event`() = runTest(dispatcher) {
-        val viewModel = OnboardingViewModel(BootstrapStudioUseCase(FakeStudioBootstrapRepository()))
+        val viewModel = BusinessSetupViewModel(BootstrapStudioUseCase(FakeStudioBootstrapRepository()))
 
-        viewModel.onAction(OnboardingAction.OnStudioNameChanged("Studio Move"))
-        viewModel.onAction(OnboardingAction.OnPhoneChanged("11999999999"))
-        viewModel.onAction(OnboardingAction.OnBusinessTypeSelected(BusinessType.Mixed))
+        viewModel.onAction(BusinessSetupAction.OnBusinessNameChanged("Studio Move"))
+        viewModel.onAction(BusinessSetupAction.OnBusinessTypeSelected(BusinessType.Mixed))
+        viewModel.onAction(BusinessSetupAction.OnTeamSizeSelected(TeamSizeRange.OneToThree))
+        viewModel.onAction(BusinessSetupAction.OnCityStateChanged("Sao Paulo, SP"))
 
         viewModel.events.test {
-            viewModel.onAction(OnboardingAction.OnSubmitClicked)
+            viewModel.onAction(BusinessSetupAction.OnSubmitClicked)
             advanceUntilIdle()
-            assertEquals(OnboardingEvent.Completed, awaitItem())
+            assertEquals(BusinessSetupEvent.Completed, awaitItem())
         }
     }
 
     @Test
     fun `bootstrap failure emits message`() = runTest(dispatcher) {
         val repo = FakeStudioBootstrapRepository(result = Result.Failure(OnboardingError.PermissionDenied))
-        val viewModel = OnboardingViewModel(BootstrapStudioUseCase(repo))
+        val viewModel = BusinessSetupViewModel(BootstrapStudioUseCase(repo))
 
-        viewModel.onAction(OnboardingAction.OnStudioNameChanged("Studio Move"))
-        viewModel.onAction(OnboardingAction.OnPhoneChanged("11999999999"))
+        viewModel.onAction(BusinessSetupAction.OnBusinessNameChanged("Studio Move"))
+        viewModel.onAction(BusinessSetupAction.OnBusinessTypeSelected(BusinessType.Mixed))
+        viewModel.onAction(BusinessSetupAction.OnTeamSizeSelected(TeamSizeRange.OneToThree))
+        viewModel.onAction(BusinessSetupAction.OnCityStateChanged("Sao Paulo, SP"))
 
         viewModel.events.test {
-            viewModel.onAction(OnboardingAction.OnSubmitClicked)
+            viewModel.onAction(BusinessSetupAction.OnSubmitClicked)
             advanceUntilIdle()
-            assertIs<OnboardingEvent.ShowMessage>(awaitItem())
+            assertIs<BusinessSetupEvent.ShowMessage>(awaitItem())
         }
     }
 
@@ -87,11 +93,13 @@ class OnboardingViewModelTest {
     fun `submitting keeps loading while bootstrap is in progress`() = runTest(dispatcher) {
         val gate = CompletableDeferred<Unit>()
         val repo = FakeStudioBootstrapRepository(pendingGate = gate)
-        val viewModel = OnboardingViewModel(BootstrapStudioUseCase(repo))
+        val viewModel = BusinessSetupViewModel(BootstrapStudioUseCase(repo))
 
-        viewModel.onAction(OnboardingAction.OnStudioNameChanged("Studio Move"))
-        viewModel.onAction(OnboardingAction.OnPhoneChanged("11999999999"))
-        viewModel.onAction(OnboardingAction.OnSubmitClicked)
+        viewModel.onAction(BusinessSetupAction.OnBusinessNameChanged("Studio Move"))
+        viewModel.onAction(BusinessSetupAction.OnBusinessTypeSelected(BusinessType.Mixed))
+        viewModel.onAction(BusinessSetupAction.OnTeamSizeSelected(TeamSizeRange.OneToThree))
+        viewModel.onAction(BusinessSetupAction.OnCityStateChanged("Sao Paulo, SP"))
+        viewModel.onAction(BusinessSetupAction.OnSubmitClicked)
         runCurrent()
 
         assertTrue(viewModel.state.value.isSubmitting)

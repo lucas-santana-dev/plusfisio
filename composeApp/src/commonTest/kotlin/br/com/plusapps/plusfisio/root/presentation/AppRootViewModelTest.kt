@@ -50,7 +50,7 @@ class AppRootViewModelTest {
     }
 
     @Test
-    fun `session without studio goes to onboarding`() = runTest(dispatcher) {
+    fun `session without studio goes to onboarding welcome`() = runTest(dispatcher) {
         val session = AuthSession(
             userId = "user-setup",
             email = "setup@plusfisio.com",
@@ -66,7 +66,7 @@ class AppRootViewModelTest {
         )
         advanceUntilIdle()
 
-        assertEquals(AppRoute.Onboarding, viewModel.state.value.route)
+        assertEquals(AppRoute.OnboardingWelcome, viewModel.state.value.route)
         assertEquals(session, viewModel.state.value.session)
     }
 
@@ -112,7 +112,7 @@ class AppRootViewModelTest {
 
         viewModel.onLoginCompleted(session)
 
-        assertEquals(AppRoute.Onboarding, viewModel.state.value.route)
+        assertEquals(AppRoute.OnboardingWelcome, viewModel.state.value.route)
         assertEquals(session, viewModel.state.value.session)
     }
 
@@ -150,11 +150,20 @@ private class RootAuthRepositoryForTest(
     private var currentSession: AuthSession?
 ) : AuthRepository {
 
-    override suspend fun signUp(name: String, email: String, password: String): Result<AuthSession, AuthError> {
+    override suspend fun signUp(
+        name: String,
+        whatsapp: String,
+        email: String,
+        password: String
+    ): Result<AuthSession, AuthError> {
         return Result.Failure(AuthError.Unknown)
     }
 
     override suspend fun signIn(email: String, password: String): Result<AuthSession, AuthError> {
+        return Result.Failure(AuthError.Unknown)
+    }
+
+    override suspend fun sendPasswordReset(email: String): Result<Unit, AuthError> {
         return Result.Failure(AuthError.Unknown)
     }
 
