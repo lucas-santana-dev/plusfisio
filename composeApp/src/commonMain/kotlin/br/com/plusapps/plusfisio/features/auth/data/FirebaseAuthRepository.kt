@@ -17,14 +17,12 @@ import dev.gitlive.firebase.firestore.firestore
 
 class FirebaseAuthRepository : AuthRepository {
 
-    private val auth = Firebase.auth
-    private val firestore = Firebase.firestore
-
     override suspend fun signUp(
         name: String,
         email: String,
         password: String
     ): Result<AuthSession, AuthError> {
+        val auth = authOrNull() ?: return Result.Failure(AuthError.ProviderDisabled)
         val normalizedName = name.trim()
         val normalizedEmail = email.trim()
         val userResult: Result<dev.gitlive.firebase.auth.FirebaseUser, AuthError> = try {
@@ -55,6 +53,7 @@ class FirebaseAuthRepository : AuthRepository {
     }
 
     override suspend fun signIn(email: String, password: String): Result<AuthSession, AuthError> {
+        val auth = authOrNull() ?: return Result.Failure(AuthError.ProviderDisabled)
         val userResult: Result<dev.gitlive.firebase.auth.FirebaseUser, AuthError> = try {
             Result.Success(requireNotNull(auth.signInWithEmailAndPassword(email, password).user))
         } catch (error: FirebaseAuthException) {
@@ -72,6 +71,7 @@ class FirebaseAuthRepository : AuthRepository {
     }
 
     override suspend fun getCurrentSession(): AuthSession? {
+        val auth = authOrNull() ?: return null
         val currentUser = auth.currentUser ?: return null
 
         return when (val sessionResult = resolveSession(currentUser)) {
@@ -81,7 +81,7 @@ class FirebaseAuthRepository : AuthRepository {
     }
 
     override suspend fun signOut() {
-        auth.signOut()
+        authOrNull()?.signOut()
     }
 
     private suspend fun resolveSession(
@@ -124,6 +124,7 @@ class FirebaseAuthRepository : AuthRepository {
         user: dev.gitlive.firebase.auth.FirebaseUser,
         preferredDisplayName: String? = null
     ): UserProfileDocument {
+        val firestore = firestoreOrNull() ?: throw IllegalStateException("Firebase Firestore is not configured")
         val reference = firestore.collection(FirestoreCollections.USERS).document(user.uid)
         val snapshot = reference.get()
 
@@ -145,6 +146,10 @@ class FirebaseAuthRepository : AuthRepository {
         reference.set(profile)
         return profile
     }
+
+    private fun authOrNull() = runCatching { Firebase.auth }.getOrNull()
+
+    private fun firestoreOrNull() = runCatching { Firebase.firestore }.getOrNull()
 }
 
 private fun FirebaseAuthException.toAuthError(): AuthError {

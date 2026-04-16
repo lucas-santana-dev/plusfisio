@@ -20,10 +20,9 @@ import kotlinx.serialization.Serializable
 
 class FirebaseStudioBootstrapRepository : StudioBootstrapRepository {
 
-    private val auth = Firebase.auth
-    private val firestore = Firebase.firestore
-
     override suspend fun bootstrapStudio(input: BootstrapStudioInput): EmptyResult<OnboardingError> {
+        val auth = authOrNull() ?: return Result.Failure(OnboardingError.Unknown)
+        val firestore = firestoreOrNull() ?: return Result.Failure(OnboardingError.Unknown)
         val currentUser = auth.currentUser ?: return Result.Failure(OnboardingError.UserNotAuthenticated)
         val now = currentEpochMillis()
         val studioId = stableStudioIdFor(currentUser.uid)
@@ -133,6 +132,10 @@ class FirebaseStudioBootstrapRepository : StudioBootstrapRepository {
         memberReference.set(memberDocument)
         userProfileReference.set(userProfileDocument)
     }
+
+    private fun authOrNull() = runCatching { Firebase.auth }.getOrNull()
+
+    private fun firestoreOrNull() = runCatching { Firebase.firestore }.getOrNull()
 }
 
 @Serializable

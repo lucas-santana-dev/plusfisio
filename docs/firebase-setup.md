@@ -2,41 +2,27 @@
 
 ## Objetivo
 
-Documentar a configuracao inicial do Firebase para o MVP do PlusFisio, com foco em simplicidade operacional, multi-tenant por `studioId` e seguranca suficiente para o inicio do desenvolvimento.
+Documentar a configuracao local minima do Firebase para desenvolver o MVP do PlusFisio sem versionar configuracoes de ambiente reais no repositorio.
 
-## Projeto vinculado
+## O que fica versionado
 
-- Firebase project display name: `PlusFisio`
-- Firebase project id: `plusfisio-a57f5`
-
-O repositorio esta vinculado a esse projeto por meio do arquivo `.firebaserc`.
-
-## Arquivos criados
-
-- `.firebaserc`
 - `firebase.json`
 - `firestore.rules`
 - `firestore.indexes.json`
 
-## Apps criados no Firebase
+Esses arquivos definem comportamento esperado do backend e podem permanecer no repositorio.
 
-### Android
+## O que nao fica versionado
 
-- display name: `PlusFisio-Android`
-- package name: `br.com.plusapps.plusfisio`
-- Firebase app id: `1:609787046500:android:916e357e768bc112444d71`
-- config local: `composeApp/google-services.json`
+- `.firebaserc`
+- `composeApp/google-services.json`
+- `iosApp/iosApp/GoogleService-Info.plist`
 
-### iOS
-
-- display name: `PlusFisio-iOS`
-- bundle id: `br.com.plusapps.plusfisio.ios`
-- Firebase app id: `1:609787046500:ios:b676dccd1d679e5c444d71`
-- config local: `iosApp/iosApp/GoogleService-Info.plist`
+Esses arquivos apontam para um projeto Firebase concreto e devem existir apenas no ambiente local ou no CI seguro.
 
 ## Integracao iOS no repositorio
 
-O projeto iOS agora referencia o Firebase Apple SDK diretamente no `iosApp.xcodeproj` via Swift Package Manager.
+O projeto iOS referencia o Firebase Apple SDK diretamente no `iosApp.xcodeproj` via Swift Package Manager.
 
 Produtos atualmente vinculados ao target:
 
@@ -46,113 +32,67 @@ Produtos atualmente vinculados ao target:
 
 O arquivo `GoogleService-Info.plist` continua local e fora do Git.
 
-## Ajuste feito no projeto iOS
-
-O arquivo `iosApp/Configuration/Config.xcconfig` foi ajustado para usar um bundle identifier fixo:
-
-- `br.com.plusapps.plusfisio.ios`
-
-Isso foi necessario porque o valor anterior dependia de `$(TEAM_ID)`, o que impede o cadastro consistente do app no Firebase.
-
-## O que foi configurado
+## Configuracao local recomendada
 
 ### Firebase CLI
 
-O CLI esta autenticado localmente e o projeto padrao do repositorio foi configurado como `plusfisio-a57f5`.
+1. autenticar localmente com `firebase login`
+2. selecionar o projeto correto com `firebase use --add`
+3. manter o `.firebaserc` gerado apenas na maquina local
 
-### Firestore
+### Android
 
-O arquivo `firebase.json` aponta para:
+1. criar ou selecionar um app Android no projeto Firebase
+2. usar o package name `br.com.plusapps.plusfisio`
+3. baixar `google-services.json`
+4. salvar o arquivo em `composeApp/google-services.json`
 
-- regras em `firestore.rules`
-- indices em `firestore.indexes.json`
+O arquivo esta no `.gitignore` e o plugin `com.google.gms.google-services` so e aplicado quando ele existe localmente.
 
-No momento, o arquivo de indices esta vazio. Isso e intencional. Os indices devem ser adicionados apenas quando os casos de uso e consultas reais exigirem isso.
+### iOS
 
-### Auth + Firestore no app
+1. criar ou selecionar um app iOS no projeto Firebase
+2. usar o bundle id definido em `iosApp/Configuration/Config.xcconfig`
+3. baixar `GoogleService-Info.plist`
+4. adicionar o arquivo em `iosApp/iosApp/GoogleService-Info.plist`
+5. incluir o plist no target do app no Xcode
+6. criar `iosApp/Configuration/Config.local.xcconfig` com o `TEAM_ID` local
+7. abrir `iosApp/iosApp.xcodeproj` no Xcode para o SwiftPM resolver os pacotes
 
-O app passou a usar Firebase real no fluxo de autenticacao:
+O app iOS protege `FirebaseApp.configure()` quando o plist nao existe, evitando crash em ambientes sem configuracao local.
 
-- `Firebase Authentication` para login com e-mail e senha
-- `Cloud Firestore` para manter o perfil leve do usuario em `users/{uid}`
+Para o passo a passo completo no Mac, ver `docs/ios-setup.md`.
 
-Ao entrar:
+## Firestore e multi-tenant
 
-1. o app autentica no Firebase Auth
-2. busca ou cria o documento `users/{uid}`
-3. monta a `AuthSession` com `email`, `displayName` e `studioId`
+O modelo canonico do MVP continua sendo:
 
-Se `studioId` estiver nulo, o app segue para o placeholder de onboarding.
-
-### Emulators
-
-Foi deixada uma configuracao base de emuladores para desenvolvimento local:
-
-- Auth: `9099`
-- Firestore: `8080`
-- Emulator UI: `4000`
-
-Isso permite testar autenticacao e regras sem depender imediatamente do ambiente online.
-
-## Estrategia de seguranca adotada
-
-As regras do Firestore seguem uma direcao simples para esta etapa:
-
-- todos os dados de negocio continuam planejados abaixo de `studios/{studioId}`
-- o perfil do usuario autenticado fica em `users/{uid}`
-- leitura e escrita do proprio perfil exigem usuario autenticado
-- leitura de dados internos do estudio exige membership existente
-- enquanto o onboarding real ainda nao existir nesta branch, a criacao de `studios` e `members` fica bloqueada nas regras
-
-### Estrutura esperada
-
-As regras foram desenhadas assumindo a seguinte base:
-
-- `users/{userId}`
+- `users/{uid}`
 - `studios/{studioId}`
-- `studios/{studioId}/members/{userId}`
+- `studios/{studioId}/members/{uid}`
 - `studios/{studioId}/clients/{clientId}`
 - `studios/{studioId}/appointments/{appointmentId}`
 - `studios/{studioId}/packages/{packageId}`
+- `studios/{studioId}/packageLedger/{entryId}`
 - `studios/{studioId}/payments/{paymentId}`
 
-Essa direcao reduz risco de vazamento entre tenants e deixa a modelagem legivel para o MVP.
-
-## Premissas importantes das regras
-
-As regras atuais assumem:
-
-1. O usuario autenticado pode ler apenas `users/{uid}` e so pode atualizar `studioId` e `role` quando esses valores baterem com a membership real criada no bootstrap.
-2. O acesso aos dados internos do estudio depende de um documento de membership em `studios/{studioId}/members/{uid}`.
-3. O onboarding desta branch ainda e placeholder, entao a app shell autenticada nao pode criar `studios/{studioId}` nem `members/{uid}`.
-
-Sem membership, o usuario continua autenticado, mas fica fora da area de dados do estudio e cai no onboarding.
-
-## Decisoes pragmaticas
-
-- Nao inicializamos `Functions` ainda.
-- Nao adicionamos `Storage Rules` ainda.
-- Nao adicionamos `Hosting`.
-- Nao adicionamos indices especulativos.
-- Nao dependemos de `custom claims` para o bootstrap inicial do MVP.
-
-Essas pecas devem entrar apenas quando houver necessidade real no fluxo do MVP.
+As regras devem preservar isolamento por `studioId` e impedir que um usuario manipule tenant sem membership valida.
 
 ## Comandos uteis
 
-### Validar o projeto vinculado
+### Selecionar projeto local
 
 ```powershell
-firebase use
+firebase use --add
 ```
 
-### Fazer deploy das regras do Firestore
+### Validar regras
 
 ```powershell
 firebase deploy --only firestore:rules
 ```
 
-### Fazer deploy dos indices do Firestore
+### Validar indices
 
 ```powershell
 firebase deploy --only firestore:indexes
@@ -181,13 +121,14 @@ firebase projects:list
 
 ## Pontos de atencao
 
+- Nao publique ids de projeto, app ids, API keys de configuracao cliente ou arquivos de ambiente reais em PRs.
 - Os arquivos `composeApp/google-services.json` e `iosApp/iosApp/GoogleService-Info.plist` precisam existir localmente e estao no `.gitignore`.
 - O provider `Email/Password` ainda precisa estar habilitado no console do Firebase Authentication.
 - O projeto iOS ja inclui o Firebase Apple SDK via Swift Package Manager; o passo manual remanescente no Mac e apenas fornecer `GoogleService-Info.plist` local e configurar assinatura.
+- Se for necessario CI com Firebase real, use secrets do provedor de CI e gere os arquivos durante o pipeline.
+- Sem configuracao local do Firebase, o app deve continuar compilando; os fluxos que dependem de backend real ficam indisponiveis ate a configuracao ser adicionada.
 - Se o onboarding inicial do estudio ainda nao estiver definido, o usuario autenticado continuara caindo no fluxo de onboarding com `studioId = null`.
 - As regras atuais bloqueiam a autoassociacao do usuario a um tenant para preservar o isolamento multi-tenant ate a entrega do onboarding real.
-
-Para o passo a passo completo no Mac, ver `docs/ios-setup.md`.
 
 ## Quando expandir a configuracao
 
@@ -203,24 +144,3 @@ Adicionar `Storage` quando houver necessidade real de:
 - foto de perfil
 - anexos simples
 - arquivos de suporte operacional
-
-## Firestore foundation update
-
-The project now has a canonical Firestore model for the MVP:
-
-- `users/{uid}`
-- `studios/{studioId}`
-- `studios/{studioId}/members/{uid}`
-- `studios/{studioId}/clients/{clientId}`
-- `studios/{studioId}/appointments/{appointmentId}`
-- `studios/{studioId}/packages/{packageId}`
-- `studios/{studioId}/packageLedger/{entryId}`
-- `studios/{studioId}/payments/{paymentId}`
-
-The onboarding flow is now responsible for materializing the tenant:
-
-1. create `studios/{studioId}`
-2. create `members/{uid}`
-3. update `users/{uid}` with `studioId` and `role`
-
-This keeps the backend ready for the MVP without creating demo operational data.

@@ -88,14 +88,13 @@ Presentation should remain unchanged:
 
 ## Platform note
 
-Android is validated with the Firebase-backed flow in Gradle.
+Android uses local Firebase config when `composeApp/google-services.json` exists.
 
 iOS already has:
 
-- `GoogleService-Info.plist`
 - fixed bundle identifier
 - native Firebase Apple SDK integrated via Swift Package Manager
-- direct `FirebaseApp.configure()` in `iOSApp.swift`
+- guarded `FirebaseApp.configure()` in `iOSApp.swift`
 
 Local setup on macOS still requires:
 
