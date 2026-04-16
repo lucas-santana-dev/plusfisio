@@ -10,17 +10,12 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Surface
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -28,16 +23,20 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.plusapps.plusfisio.core.domain.model.BusinessType
+import br.com.plusapps.plusfisio.core.presentation.components.PlusFisioButton
+import br.com.plusapps.plusfisio.core.presentation.components.PlusFisioButtonKind
+import br.com.plusapps.plusfisio.core.presentation.components.PlusFisioTextField
+import br.com.plusapps.plusfisio.core.presentation.theme.PlusFisio
 import br.com.plusapps.plusfisio.core.presentation.theme.PlusFisioTheme
 import br.com.plusapps.plusfisio.core.presentation.text.asString
 import br.com.plusapps.plusfisio.core.presentation.text.resolve
 import br.com.plusapps.plusfisio.features.auth.domain.AuthSession
 import br.com.plusapps.plusfisio.features.auth.presentation.components.AuthBackground
+import br.com.plusapps.plusfisio.features.auth.presentation.components.AuthPrimaryCard
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import plusfisio.composeapp.generated.resources.Res
@@ -92,102 +91,91 @@ fun OnboardingScreen(
     onSignOutClick: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
+    val spacing = PlusFisio.spacing
+
     AuthBackground(contentPadding = contentPadding) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .safeDrawingPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 24.dp),
+                .padding(horizontal = spacing.screenHorizontal, vertical = spacing.screenVertical),
             verticalArrangement = Arrangement.Center
         ) {
-            Surface(
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surface.copy(alpha = 0.96f),
-                shape = MaterialTheme.shapes.large
-            ) {
+            AuthPrimaryCard {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(24.dp)
+                        .padding(horizontal = spacing.grid5, vertical = spacing.grid6)
                 ) {
                     Text(
                         text = stringResource(Res.string.onboarding_title),
                         style = MaterialTheme.typography.headlineMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
-                    Spacer(modifier = Modifier.height(10.dp))
+                    Spacer(modifier = Modifier.height(spacing.grid3))
                     Text(
                         text = stringResource(Res.string.onboarding_description),
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                    Spacer(modifier = Modifier.height(18.dp))
-                    OutlinedTextField(
+                    Spacer(modifier = Modifier.height(spacing.grid4))
+                    PlusFisioTextField(
                         value = state.studioName,
                         onValueChange = { onAction(OnboardingAction.OnStudioNameChanged(it)) },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(Res.string.onboarding_studio_name_label)) },
+                        label = stringResource(Res.string.onboarding_studio_name_label),
                         isError = state.studioNameError != null,
-                        supportingText = state.studioNameError?.let { { Text(it.asString()) } },
+                        supportingText = state.studioNameError?.asString(),
                         singleLine = true
                     )
-                    Spacer(modifier = Modifier.height(14.dp))
+                    Spacer(modifier = Modifier.height(spacing.contentGap))
                     BusinessTypeField(
                         selected = state.selectedBusinessType,
                         onSelected = { onAction(OnboardingAction.OnBusinessTypeSelected(it)) }
                     )
-                    Spacer(modifier = Modifier.height(14.dp))
-                    OutlinedTextField(
+                    Spacer(modifier = Modifier.height(spacing.contentGap))
+                    PlusFisioTextField(
                         value = state.phone,
                         onValueChange = { onAction(OnboardingAction.OnPhoneChanged(it)) },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(Res.string.onboarding_phone_label)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        label = stringResource(Res.string.onboarding_phone_label),
                         singleLine = true,
                         isError = state.phoneError != null,
-                        supportingText = state.phoneError?.let { { Text(it.asString()) } }
+                        supportingText = state.phoneError?.asString()
                     )
-                    Spacer(modifier = Modifier.height(14.dp))
-                    OutlinedTextField(
+                    Spacer(modifier = Modifier.height(spacing.contentGap))
+                    PlusFisioTextField(
                         value = state.whatsappPhone,
                         onValueChange = { onAction(OnboardingAction.OnWhatsappChanged(it)) },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(Res.string.onboarding_whatsapp_label)) },
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        label = stringResource(Res.string.onboarding_whatsapp_label),
                         singleLine = true
                     )
-                    Spacer(modifier = Modifier.height(14.dp))
-                    OutlinedTextField(
+                    Spacer(modifier = Modifier.height(spacing.contentGap))
+                    PlusFisioTextField(
                         value = state.timezone,
                         onValueChange = { onAction(OnboardingAction.OnTimezoneChanged(it)) },
                         modifier = Modifier.fillMaxWidth(),
-                        label = { Text(stringResource(Res.string.onboarding_timezone_label)) },
+                        label = stringResource(Res.string.onboarding_timezone_label),
                         singleLine = true
                     )
-                    Spacer(modifier = Modifier.height(22.dp))
-                    Button(
+                    Spacer(modifier = Modifier.height(spacing.grid5))
+                    PlusFisioButton(
+                        text = stringResource(Res.string.onboarding_cta),
                         onClick = { onAction(OnboardingAction.OnSubmitClicked) },
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !state.isSubmitting
-                    ) {
-                        if (state.isSubmitting) {
-                            CircularProgressIndicator(
-                                color = MaterialTheme.colorScheme.onPrimary,
-                                strokeWidth = 2.dp
-                            )
-                        } else {
-                            Text(stringResource(Res.string.onboarding_cta))
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    OutlinedButton(
+                        enabled = !state.isSubmitting,
+                        loading = state.isSubmitting
+                    )
+                    Spacer(modifier = Modifier.height(spacing.grid3))
+                    PlusFisioButton(
+                        text = stringResource(Res.string.onboarding_sign_out),
                         onClick = onSignOutClick,
                         modifier = Modifier.fillMaxWidth(),
-                        enabled = !state.isSubmitting
-                    ) {
-                        Text(stringResource(Res.string.onboarding_sign_out))
-                    }
+                        enabled = !state.isSubmitting,
+                        kind = PlusFisioButtonKind.Secondary
+                    )
                 }
             }
         }
