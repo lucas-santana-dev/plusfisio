@@ -1,7 +1,5 @@
 package br.com.plusapps.plusfisio.features.auth.presentation.signup
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -12,16 +10,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -31,14 +21,16 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import br.com.plusapps.plusfisio.core.presentation.components.PlusFisioButton
+import br.com.plusapps.plusfisio.core.presentation.components.PlusFisioButtonKind
+import br.com.plusapps.plusfisio.core.presentation.components.PlusFisioTextField
+import br.com.plusapps.plusfisio.core.presentation.theme.PlusFisio
 import br.com.plusapps.plusfisio.core.presentation.theme.PlusFisioTheme
 import br.com.plusapps.plusfisio.core.presentation.text.asString
 import br.com.plusapps.plusfisio.core.presentation.text.resolve
@@ -104,13 +96,15 @@ fun SignUpScreen(
     onAction: (SignUpAction) -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp)
 ) {
+    val spacing = PlusFisio.spacing
+
     AuthBackground(contentPadding = contentPadding) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .safeDrawingPadding()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 20.dp, vertical = 24.dp),
+                .padding(horizontal = spacing.screenHorizontal, vertical = spacing.screenVertical),
             verticalArrangement = Arrangement.Center
         ) {
             AuthBranding(
@@ -118,7 +112,7 @@ fun SignUpScreen(
                 title = stringResource(Res.string.auth_brand_name),
                 subtitle = stringResource(Res.string.auth_login_brand_subtitle)
             )
-            Spacer(modifier = Modifier.height(28.dp))
+            Spacer(modifier = Modifier.height(spacing.grid7))
             SignUpCard(
                 state = state,
                 onAction = onAction
@@ -136,7 +130,7 @@ private fun SignUpCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp, vertical = 24.dp)
+                .padding(horizontal = PlusFisio.spacing.grid5, vertical = PlusFisio.spacing.grid6)
         ) {
             Text(
                 text = stringResource(Res.string.auth_signup_title),
@@ -149,28 +143,27 @@ private fun SignUpCard(
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(20.dp))
-            OutlinedTextField(
+            Spacer(modifier = Modifier.height(PlusFisio.spacing.grid5))
+            PlusFisioTextField(
                 value = state.name,
                 onValueChange = { onAction(SignUpAction.OnNameChanged(it)) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(Res.string.auth_name_label)) },
+                label = stringResource(Res.string.auth_name_label),
                 singleLine = true,
-                supportingText = state.nameError?.let { { Text(it.asString()) } },
+                supportingText = state.nameError?.asString(),
                 isError = state.nameError != null
             )
-            Spacer(modifier = Modifier.height(14.dp))
-            OutlinedTextField(
+            Spacer(modifier = Modifier.height(PlusFisio.spacing.contentGap))
+            PlusFisioTextField(
                 value = state.email,
                 onValueChange = { onAction(SignUpAction.OnEmailChanged(it)) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(Res.string.auth_email_label)) },
+                label = stringResource(Res.string.auth_email_label),
                 singleLine = true,
-                supportingText = state.emailError?.let { { Text(it.asString()) } },
-                isError = state.emailError != null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                supportingText = state.emailError?.asString(),
+                isError = state.emailError != null
             )
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(PlusFisio.spacing.contentGap))
             PasswordField(
                 value = state.password,
                 onValueChange = { onAction(SignUpAction.OnPasswordChanged(it)) },
@@ -180,7 +173,7 @@ private fun SignUpCard(
                 supportingText = state.passwordError?.asString(),
                 isError = state.passwordError != null
             )
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(PlusFisio.spacing.contentGap))
             PasswordField(
                 value = state.confirmPassword,
                 onValueChange = { onAction(SignUpAction.OnConfirmPasswordChanged(it)) },
@@ -190,43 +183,24 @@ private fun SignUpCard(
                 supportingText = state.confirmPasswordError?.asString(),
                 isError = state.confirmPasswordError != null
             )
-            Spacer(modifier = Modifier.height(18.dp))
-            Button(
+            Spacer(modifier = Modifier.height(PlusFisio.spacing.grid4))
+            PlusFisioButton(
+                text = stringResource(Res.string.auth_signup_button),
                 onClick = { onAction(SignUpAction.OnSignUpClicked) },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(54.dp),
+                    .fillMaxWidth(),
                 enabled = !state.isLoading,
-                shape = RoundedCornerShape(20.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.height(18.dp)
-                    )
-                } else {
-                    Text(
-                        text = stringResource(Res.string.auth_signup_button),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-            }
+                loading = state.isLoading
+            )
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedButton(
+            PlusFisioButton(
+                text = stringResource(Res.string.auth_signup_have_account),
                 onClick = { onAction(SignUpAction.OnLoginClicked) },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
+                    .fillMaxWidth(),
                 enabled = !state.isLoading,
-                shape = RoundedCornerShape(20.dp)
-            ) {
-                Text(stringResource(Res.string.auth_signup_have_account))
-            }
+                kind = PlusFisioButtonKind.Secondary
+            )
             Spacer(modifier = Modifier.height(18.dp))
             Text(
                 text = stringResource(Res.string.auth_signup_helper_info),
@@ -253,38 +227,25 @@ private fun PasswordField(
     supportingText: String?,
     isError: Boolean
 ) {
-    OutlinedTextField(
+    PlusFisioTextField(
         value = value,
         onValueChange = onValueChange,
         modifier = Modifier.fillMaxWidth(),
-        label = { Text(label) },
+        label = label,
         singleLine = true,
-        supportingText = supportingText?.let { { Text(it) } },
+        supportingText = supportingText,
         isError = isError,
         visualTransformation = if (isVisible) {
             VisualTransformation.None
         } else {
             PasswordVisualTransformation()
         },
-        trailingIcon = {
-            Text(
-                text = if (isVisible) {
-                    stringResource(Res.string.auth_hide_password)
-                } else {
-                    stringResource(Res.string.auth_show_password)
-                },
-                modifier = Modifier
-                    .clip(CircleShape)
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) { onToggleVisibility() }
-                    .padding(horizontal = 8.dp, vertical = 6.dp),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.primary
-            )
+        trailingLabel = if (isVisible) {
+            stringResource(Res.string.auth_hide_password)
+        } else {
+            stringResource(Res.string.auth_show_password)
         },
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+        onTrailingClick = onToggleVisibility
     )
 }
 

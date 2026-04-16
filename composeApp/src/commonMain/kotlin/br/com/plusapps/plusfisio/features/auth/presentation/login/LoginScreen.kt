@@ -13,33 +13,26 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import br.com.plusapps.plusfisio.core.presentation.components.PlusFisioButton
+import br.com.plusapps.plusfisio.core.presentation.components.PlusFisioButtonKind
+import br.com.plusapps.plusfisio.core.presentation.components.PlusFisioTextField
 import br.com.plusapps.plusfisio.core.presentation.text.UiText
 import br.com.plusapps.plusfisio.core.presentation.text.asString
 import br.com.plusapps.plusfisio.core.presentation.theme.PlusFisio
@@ -165,96 +158,69 @@ private fun LoginCard(
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(modifier = Modifier.height(spacing.sectionGap))
-            OutlinedTextField(
+            PlusFisioTextField(
                 value = state.email,
                 onValueChange = { onAction(LoginAction.OnEmailChanged(it)) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(Res.string.auth_email_label)) },
+                label = stringResource(Res.string.auth_email_label),
                 singleLine = true,
-                supportingText = state.emailError?.let { { Text(it.asString()) } },
-                isError = state.emailError != null,
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email)
+                supportingText = state.emailError?.asString(),
+                isError = state.emailError != null
             )
             Spacer(modifier = Modifier.height(spacing.contentGap))
-            OutlinedTextField(
+            PlusFisioTextField(
                 value = state.password,
                 onValueChange = { onAction(LoginAction.OnPasswordChanged(it)) },
                 modifier = Modifier.fillMaxWidth(),
-                label = { Text(stringResource(Res.string.auth_password_label)) },
+                label = stringResource(Res.string.auth_password_label),
                 singleLine = true,
-                supportingText = state.passwordError?.let { { Text(it.asString()) } },
+                supportingText = state.passwordError?.asString(),
                 isError = state.passwordError != null,
                 visualTransformation = if (state.isPasswordVisible) {
                     VisualTransformation.None
                 } else {
                     PasswordVisualTransformation()
                 },
-                trailingIcon = {
-                    Text(
-                        text = if (state.isPasswordVisible) {
-                            stringResource(Res.string.auth_hide_password)
-                        } else {
-                            stringResource(Res.string.auth_show_password)
-                        },
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) { onAction(LoginAction.OnTogglePasswordVisibility) }
-                            .padding(horizontal = spacing.grid2, vertical = spacing.grid1 + spacing.grid1 / 2),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = PlusFisio.colors.brand
-                    )
+                trailingLabel = if (state.isPasswordVisible) {
+                    stringResource(Res.string.auth_hide_password)
+                } else {
+                    stringResource(Res.string.auth_show_password)
                 },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password)
+                onTrailingClick = { onAction(LoginAction.OnTogglePasswordVisibility) }
             )
             Spacer(modifier = Modifier.height(spacing.grid3))
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
             ) {
-                TextButton(onClick = { onAction(LoginAction.OnForgotPasswordClicked) }) {
-                    Text(stringResource(Res.string.auth_forgot_password))
-                }
+                PlusFisioButton(
+                    text = stringResource(Res.string.auth_forgot_password),
+                    onClick = { onAction(LoginAction.OnForgotPasswordClicked) },
+                    kind = PlusFisioButtonKind.Tertiary
+                )
             }
             Spacer(modifier = Modifier.height(spacing.grid3))
-            Button(
+            PlusFisioButton(
+                text = if (state.isLoading) {
+                    stringResource(Res.string.auth_login_loading)
+                } else {
+                    stringResource(Res.string.auth_login_button)
+                },
                 onClick = { onAction(LoginAction.OnLoginClicked) },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(spacing.controlHeight),
+                    .fillMaxWidth(),
                 enabled = !state.isLoading,
-                shape = PlusFisio.shapes.control,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
-            ) {
-                if (state.isLoading) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.onPrimary,
-                        strokeWidth = 2.dp,
-                        modifier = Modifier.height(18.dp)
-                    )
-                } else {
-                    Text(
-                        text = stringResource(Res.string.auth_login_button),
-                        style = MaterialTheme.typography.labelLarge
-                    )
-                }
-            }
+                loading = state.isLoading
+            )
             Spacer(modifier = Modifier.height(12.dp))
-            OutlinedButton(
+            PlusFisioButton(
+                text = stringResource(Res.string.auth_login_create_account),
                 onClick = { onAction(LoginAction.OnCreateAccountClicked) },
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .height(spacing.controlHeight),
+                    .fillMaxWidth(),
                 enabled = !state.isLoading,
-                shape = PlusFisio.shapes.control
-            ) {
-                Text(stringResource(Res.string.auth_login_create_account))
-            }
+                kind = PlusFisioButtonKind.Secondary
+            )
             Spacer(modifier = Modifier.height(spacing.blockGap))
             Text(
                 text = stringResource(Res.string.auth_login_placeholder_info),
