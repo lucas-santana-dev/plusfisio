@@ -7,6 +7,7 @@ import br.com.plusapps.plusfisio.features.auth.domain.AuthSession
 @Stable
 data class SignUpState(
     val name: String = "",
+    val whatsapp: String = "",
     val email: String = "",
     val password: String = "",
     val confirmPassword: String = "",
@@ -14,6 +15,7 @@ data class SignUpState(
     val isConfirmPasswordVisible: Boolean = false,
     val isLoading: Boolean = false,
     val nameError: UiText? = null,
+    val whatsappError: UiText? = null,
     val emailError: UiText? = null,
     val passwordError: UiText? = null,
     val confirmPasswordError: UiText? = null
@@ -21,6 +23,7 @@ data class SignUpState(
 
 sealed interface SignUpAction {
     data class OnNameChanged(val value: String) : SignUpAction
+    data class OnWhatsappChanged(val value: String) : SignUpAction
     data class OnEmailChanged(val value: String) : SignUpAction
     data class OnPasswordChanged(val value: String) : SignUpAction
     data class OnConfirmPasswordChanged(val value: String) : SignUpAction

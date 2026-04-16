@@ -33,6 +33,15 @@ class AppRootViewModel(
         }
     }
 
+    fun onForgotPasswordRequested() {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.ForgotPassword
+            )
+        }
+    }
+
     fun onLoginRequested() {
         _state.update {
             it.copy(
@@ -59,6 +68,24 @@ class AppRootViewModel(
 
     fun onOnboardingCompleted() {
         refreshDestination()
+    }
+
+    fun onOnboardingWelcomeRequested() {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.OnboardingWelcome
+            )
+        }
+    }
+
+    fun onBusinessSetupRequested() {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.OnboardingBusinessSetup
+            )
+        }
     }
 
     fun onSignOut() {
@@ -100,14 +127,16 @@ sealed interface AppRoute {
     data object Splash : AppRoute
     data object Login : AppRoute
     data object SignUp : AppRoute
-    data object Onboarding : AppRoute
+    data object ForgotPassword : AppRoute
+    data object OnboardingWelcome : AppRoute
+    data object OnboardingBusinessSetup : AppRoute
     data object Home : AppRoute
 }
 
 private fun AuthSession?.toRoute(): AppRoute {
     return when {
         this == null -> AppRoute.Login
-        studioId.isNullOrBlank() -> AppRoute.Onboarding
+        studioId.isNullOrBlank() -> AppRoute.OnboardingWelcome
         else -> AppRoute.Home
     }
 }

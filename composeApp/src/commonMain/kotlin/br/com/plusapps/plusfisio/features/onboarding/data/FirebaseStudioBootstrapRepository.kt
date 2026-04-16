@@ -9,6 +9,7 @@ import br.com.plusapps.plusfisio.core.domain.Result
 import br.com.plusapps.plusfisio.core.domain.model.BusinessType
 import br.com.plusapps.plusfisio.core.domain.model.FirestoreCollections
 import br.com.plusapps.plusfisio.core.domain.model.StudioUserRole
+import br.com.plusapps.plusfisio.core.domain.model.TeamSizeRange
 import br.com.plusapps.plusfisio.features.onboarding.domain.BootstrapStudioInput
 import br.com.plusapps.plusfisio.features.onboarding.domain.OnboardingError
 import br.com.plusapps.plusfisio.features.onboarding.domain.StudioBootstrapRepository
@@ -32,12 +33,14 @@ class FirebaseStudioBootstrapRepository : StudioBootstrapRepository {
 
         val studioDocument = StudioDocument(
             studioId = studioId,
-            name = input.studioName.trim(),
+            name = input.businessName.trim(),
             businessType = input.businessType,
+            teamSize = input.teamSize,
+            cityState = input.cityState.trim(),
             ownerUserId = currentUser.uid,
-            timezone = input.timezone,
-            phone = input.phone.trim(),
-            whatsappPhone = input.whatsappPhone.trim().ifBlank { null },
+            timezone = "America/Sao_Paulo",
+            phone = "",
+            whatsappPhone = null,
             createdAtEpochMillis = now,
             updatedAtEpochMillis = now,
             isActive = true
@@ -143,6 +146,8 @@ private data class StudioDocument(
     val studioId: String,
     val name: String,
     val businessType: BusinessType,
+    val teamSize: TeamSizeRange,
+    val cityState: String,
     val ownerUserId: String,
     val timezone: String,
     val phone: String,

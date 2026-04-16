@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import br.com.plusapps.plusfisio.core.domain.onFailure
 import br.com.plusapps.plusfisio.core.domain.onSuccess
+import br.com.plusapps.plusfisio.core.presentation.input.isValidEmail
+import br.com.plusapps.plusfisio.core.presentation.input.sanitizeEmail
 import br.com.plusapps.plusfisio.features.auth.domain.SignInUseCase
 import br.com.plusapps.plusfisio.features.auth.presentation.toUiText
 import kotlinx.coroutines.channels.Channel
@@ -18,7 +20,6 @@ import plusfisio.composeapp.generated.resources.auth_error_email_invalid
 import plusfisio.composeapp.generated.resources.auth_error_email_required
 import plusfisio.composeapp.generated.resources.auth_error_password_required
 import plusfisio.composeapp.generated.resources.auth_error_password_short
-import plusfisio.composeapp.generated.resources.auth_event_forgot_password_pending
 import plusfisio.composeapp.generated.resources.Res
 import br.com.plusapps.plusfisio.core.presentation.text.UiText
 
@@ -60,8 +61,12 @@ class LoginViewModel(
 
             LoginAction.OnCreateAccountClicked -> emitEvent(LoginEvent.NavigateToSignUp)
             LoginAction.OnLoginClicked -> submit()
-            LoginAction.OnForgotPasswordClicked -> emitForgotPasswordMessage()
+            LoginAction.OnForgotPasswordClicked -> emitEvent(LoginEvent.NavigateToForgotPassword)
         }
+    }
+
+    fun resetState() {
+        _state.value = LoginState()
     }
 
     private fun submit() {
@@ -80,7 +85,7 @@ class LoginViewModel(
             _state.update { it.copy(isLoading = true) }
 
             signInUseCase(
-                email = current.email.trim(),
+                email = sanitizeEmail(current.email),
                 password = current.password
             ).onSuccess { session ->
                 _state.update { state ->
@@ -96,13 +101,9 @@ class LoginViewModel(
         }
     }
 
-    private fun emitForgotPasswordMessage() {
-        emitEvent(LoginEvent.ShowMessage(UiText.Resource(Res.string.auth_event_forgot_password_pending)))
-    }
-
     private fun validateEmail(value: String): UiText? {
         if (value.isBlank()) return UiText.Resource(Res.string.auth_error_email_required)
-        if (!EMAIL_REGEX.matches(value.trim())) return UiText.Resource(Res.string.auth_error_email_invalid)
+        if (!isValidEmail(value)) return UiText.Resource(Res.string.auth_error_email_invalid)
         return null
     }
 
@@ -116,9 +117,5 @@ class LoginViewModel(
         viewModelScope.launch {
             _events.send(event)
         }
-    }
-
-    private companion object {
-        val EMAIL_REGEX = Regex("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+$")
     }
 }

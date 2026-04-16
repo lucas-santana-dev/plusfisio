@@ -110,6 +110,17 @@ class LoginViewModelTest {
     }
 
     @Test
+    fun `forgot password click emits navigation event`() = runTest(dispatcher) {
+        val viewModel = LoginViewModel(SignInUseCase(FakeAuthRepositoryForTest()))
+
+        viewModel.events.test {
+            viewModel.onAction(LoginAction.OnForgotPasswordClicked)
+
+            assertEquals(LoginEvent.NavigateToForgotPassword, awaitItem())
+        }
+    }
+
+    @Test
     fun `loading stays true while sign in is in progress`() = runTest(dispatcher) {
         val gate = CompletableDeferred<Unit>()
         val repository = FakeAuthRepositoryForTest(
@@ -153,7 +164,12 @@ private class FakeAuthRepositoryForTest(
     private val pendingGate: CompletableDeferred<Unit>? = null
 ) : AuthRepository {
 
-    override suspend fun signUp(name: String, email: String, password: String): Result<AuthSession, AuthError> {
+    override suspend fun signUp(
+        name: String,
+        whatsapp: String,
+        email: String,
+        password: String
+    ): Result<AuthSession, AuthError> {
         return Result.Failure(AuthError.Unknown)
     }
 
@@ -163,6 +179,10 @@ private class FakeAuthRepositoryForTest(
     }
 
     override suspend fun getCurrentSession(): AuthSession? = null
+
+    override suspend fun sendPasswordReset(email: String): Result<Unit, AuthError> {
+        return Result.Failure(AuthError.Unknown)
+    }
 
     override suspend fun signOut() = Unit
 }

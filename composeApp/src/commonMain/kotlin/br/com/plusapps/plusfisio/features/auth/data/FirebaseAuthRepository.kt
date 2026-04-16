@@ -6,6 +6,7 @@ import br.com.plusapps.plusfisio.core.data.firestore.buildBaseUserProfile
 import br.com.plusapps.plusfisio.core.data.firestore.mergeWithAuth
 import br.com.plusapps.plusfisio.core.domain.model.FirestoreCollections
 import br.com.plusapps.plusfisio.core.domain.Result
+import br.com.plusapps.plusfisio.core.presentation.input.formatBrazilPhone
 import br.com.plusapps.plusfisio.features.auth.domain.AuthError
 import br.com.plusapps.plusfisio.features.auth.domain.AuthRepository
 import br.com.plusapps.plusfisio.features.auth.domain.AuthSession
@@ -19,12 +20,14 @@ class FirebaseAuthRepository : AuthRepository {
 
     override suspend fun signUp(
         name: String,
+        whatsapp: String,
         email: String,
         password: String
     ): Result<AuthSession, AuthError> {
         val auth = authOrNull() ?: return Result.Failure(AuthError.ProviderDisabled)
         val normalizedName = name.trim()
         val normalizedEmail = email.trim()
+        val normalizedWhatsapp = formatBrazilPhone(whatsapp)
         val userResult: Result<dev.gitlive.firebase.auth.FirebaseUser, AuthError> = try {
             Result.Success(requireNotNull(auth.createUserWithEmailAndPassword(normalizedEmail, password).user))
         } catch (error: FirebaseAuthException) {
@@ -48,7 +51,8 @@ class FirebaseAuthRepository : AuthRepository {
 
         return resolveSession(
             user = user,
-            preferredDisplayName = normalizedName
+            preferredDisplayName = normalizedName,
+            preferredWhatsapp = normalizedWhatsapp
         )
     }
 
@@ -80,19 +84,34 @@ class FirebaseAuthRepository : AuthRepository {
         }
     }
 
+    override suspend fun sendPasswordReset(email: String): Result<Unit, AuthError> {
+        val auth = authOrNull() ?: return Result.Failure(AuthError.ProviderDisabled)
+
+        return try {
+            auth.sendPasswordResetEmail(email.trim())
+            Result.Success(Unit)
+        } catch (error: FirebaseAuthException) {
+            Result.Failure(error.toPasswordResetError())
+        } catch (_: Exception) {
+            Result.Failure(AuthError.PasswordResetFailed)
+        }
+    }
+
     override suspend fun signOut() {
         authOrNull()?.signOut()
     }
 
     private suspend fun resolveSession(
         user: dev.gitlive.firebase.auth.FirebaseUser,
-        preferredDisplayName: String? = null
+        preferredDisplayName: String? = null,
+        preferredWhatsapp: String? = null
     ): Result<AuthSession, AuthError> {
         return try {
             Result.Success(
                 buildSession(
                     user = user,
-                    preferredDisplayName = preferredDisplayName
+                    preferredDisplayName = preferredDisplayName,
+                    preferredWhatsapp = preferredWhatsapp
                 )
             )
         } catch (error: FirebaseFirestoreException) {
@@ -104,11 +123,13 @@ class FirebaseAuthRepository : AuthRepository {
 
     private suspend fun buildSession(
         user: dev.gitlive.firebase.auth.FirebaseUser,
-        preferredDisplayName: String? = null
+        preferredDisplayName: String? = null,
+        preferredWhatsapp: String? = null
     ): AuthSession {
         val profile = ensureBaseUserProfile(
             user = user,
-            preferredDisplayName = preferredDisplayName
+            preferredDisplayName = preferredDisplayName,
+            preferredWhatsapp = preferredWhatsapp
         )
 
         return AuthSession(
@@ -122,18 +143,25 @@ class FirebaseAuthRepository : AuthRepository {
 
     private suspend fun ensureBaseUserProfile(
         user: dev.gitlive.firebase.auth.FirebaseUser,
-        preferredDisplayName: String? = null
+        preferredDisplayName: String? = null,
+        preferredWhatsapp: String? = null
     ): UserProfileDocument {
         val firestore = firestoreOrNull() ?: throw IllegalStateException("Firebase Firestore is not configured")
         val reference = firestore.collection(FirestoreCollections.USERS).document(user.uid)
         val snapshot = reference.get()
 
         if (snapshot.exists) {
-            return snapshot.data<UserProfileDocument>().mergeWithAuth(
+            val existingProfile = snapshot.data<UserProfileDocument>()
+            val mergedProfile = existingProfile.mergeWithAuth(
                 userId = user.uid,
                 email = user.email.orEmpty(),
-                displayName = preferredDisplayName ?: user.displayName
+                displayName = preferredDisplayName ?: user.displayName,
+                whatsapp = preferredWhatsapp
             )
+            if (mergedProfile != existingProfile) {
+                reference.set(mergedProfile)
+            }
+            return mergedProfile
         }
 
         val now = currentEpochMillis()
@@ -141,6 +169,7 @@ class FirebaseAuthRepository : AuthRepository {
             userId = user.uid,
             email = user.email.orEmpty(),
             displayName = preferredDisplayName ?: user.displayName,
+            whatsapp = preferredWhatsapp,
             now = now
         )
         reference.set(profile)
@@ -186,5 +215,14 @@ internal fun mapFirebaseAuthMessageToError(message: String?): AuthError {
         "user" in normalizedMessage && "not found" in normalizedMessage -> AuthError.InvalidCredentials
         "network" in normalizedMessage -> AuthError.Network
         else -> AuthError.Unknown
+    }
+}
+
+private fun FirebaseAuthException.toPasswordResetError(): AuthError {
+    val authError = mapFirebaseAuthMessageToError(message)
+    return when (authError) {
+        AuthError.Network -> AuthError.Network
+        AuthError.ProviderDisabled -> AuthError.ProviderDisabled
+        else -> AuthError.PasswordResetFailed
     }
 }
