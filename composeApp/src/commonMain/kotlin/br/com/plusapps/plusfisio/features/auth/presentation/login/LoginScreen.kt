@@ -18,12 +18,19 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
@@ -32,14 +39,18 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import br.com.plusapps.plusfisio.core.presentation.text.UiText
 import br.com.plusapps.plusfisio.core.presentation.text.asString
 import br.com.plusapps.plusfisio.core.presentation.theme.PlusFisio
+import br.com.plusapps.plusfisio.core.presentation.text.resolve
 import br.com.plusapps.plusfisio.core.presentation.theme.PlusFisioTheme
+import br.com.plusapps.plusfisio.features.auth.domain.AuthSession
 import br.com.plusapps.plusfisio.features.auth.presentation.components.AuthBackground
 import br.com.plusapps.plusfisio.features.auth.presentation.components.AuthBranding
 import br.com.plusapps.plusfisio.features.auth.presentation.components.AuthHighlightCard
 import br.com.plusapps.plusfisio.features.auth.presentation.components.AuthPrimaryCard
+import org.koin.compose.viewmodel.koinViewModel
 import org.jetbrains.compose.resources.stringResource
 import plusfisio.composeapp.generated.resources.Res
 import plusfisio.composeapp.generated.resources.auth_brand_badge
@@ -53,6 +64,7 @@ import plusfisio.composeapp.generated.resources.auth_highlight_description
 import plusfisio.composeapp.generated.resources.auth_highlight_title
 import plusfisio.composeapp.generated.resources.auth_login_brand_subtitle
 import plusfisio.composeapp.generated.resources.auth_login_button
+import plusfisio.composeapp.generated.resources.auth_login_create_account
 import plusfisio.composeapp.generated.resources.auth_login_description
 import plusfisio.composeapp.generated.resources.auth_login_loading
 import plusfisio.composeapp.generated.resources.auth_login_placeholder_info
@@ -66,6 +78,37 @@ import plusfisio.composeapp.generated.resources.auth_show_password
  * A UI recebe apenas estado e callbacks para continuar facil de testar e de
  * conectar com a autenticacao real depois.
  */
+@Composable
+fun LoginRoot(
+    onAuthenticated: (AuthSession) -> Unit,
+    onNavigateToSignUp: () -> Unit,
+    contentPadding: PaddingValues = PaddingValues(0.dp),
+    viewModel: LoginViewModel = koinViewModel()
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(viewModel) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is LoginEvent.Authenticated -> onAuthenticated(event.session)
+                LoginEvent.NavigateToSignUp -> onNavigateToSignUp()
+                is LoginEvent.ShowMessage -> snackbarHostState.showSnackbar(event.message.resolve())
+            }
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) {
+        LoginScreen(
+            state = state,
+            onAction = viewModel::onAction,
+            contentPadding = contentPadding
+        )
+    }
+}
+
 @Composable
 fun LoginScreen(
     state: LoginState,
@@ -181,20 +224,36 @@ private fun LoginCard(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(spacing.controlHeight),
+                enabled = !state.isLoading,
                 shape = PlusFisio.shapes.control,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 )
             ) {
-                Text(
-                    text = if (state.isLoading) {
-                        stringResource(Res.string.auth_login_loading)
-                    } else {
-                        stringResource(Res.string.auth_login_button)
-                    },
-                    style = MaterialTheme.typography.labelLarge
-                )
+                if (state.isLoading) {
+                    CircularProgressIndicator(
+                        color = MaterialTheme.colorScheme.onPrimary,
+                        strokeWidth = 2.dp,
+                        modifier = Modifier.height(18.dp)
+                    )
+                } else {
+                    Text(
+                        text = stringResource(Res.string.auth_login_button),
+                        style = MaterialTheme.typography.labelLarge
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            OutlinedButton(
+                onClick = { onAction(LoginAction.OnCreateAccountClicked) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(spacing.controlHeight),
+                enabled = !state.isLoading,
+                shape = PlusFisio.shapes.control
+            ) {
+                Text(stringResource(Res.string.auth_login_create_account))
             }
             Spacer(modifier = Modifier.height(spacing.blockGap))
             Text(

@@ -1,35 +1,42 @@
 package br.com.plusapps.plusfisio.features.auth.presentation.login
 
 import androidx.lifecycle.ViewModel
-import br.com.plusapps.plusfisio.core.presentation.text.UiText
-import kotlinx.coroutines.flow.MutableSharedFlow
+import androidx.lifecycle.viewModelScope
+import br.com.plusapps.plusfisio.core.domain.onFailure
+import br.com.plusapps.plusfisio.core.domain.onSuccess
+import br.com.plusapps.plusfisio.features.auth.domain.SignInUseCase
+import br.com.plusapps.plusfisio.features.auth.presentation.toUiText
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
-import plusfisio.composeapp.generated.resources.Res
+import kotlinx.coroutines.launch
 import plusfisio.composeapp.generated.resources.auth_error_email_invalid
 import plusfisio.composeapp.generated.resources.auth_error_email_required
 import plusfisio.composeapp.generated.resources.auth_error_password_required
 import plusfisio.composeapp.generated.resources.auth_error_password_short
 import plusfisio.composeapp.generated.resources.auth_event_forgot_password_pending
-import plusfisio.composeapp.generated.resources.auth_event_login_pending
+import plusfisio.composeapp.generated.resources.Res
+import br.com.plusapps.plusfisio.core.presentation.text.UiText
 
 /**
  * ViewModel inicial do fluxo de login.
  *
- * Nesta etapa ele faz apenas validacao local e emite feedbacks temporarios,
- * mantendo a tela pronta para a futura integracao com Firebase Auth.
+ * Mantem a validacao local no proprio estado de tela e delega a autenticacao
+ * ao use case para preservar a separacao entre presentation e data.
  */
-class LoginViewModel : ViewModel() {
+class LoginViewModel(
+    private val signInUseCase: SignInUseCase
+) : ViewModel() {
 
     private val _state = MutableStateFlow(LoginState())
     val state: StateFlow<LoginState> = _state.asStateFlow()
 
-    private val _events = MutableSharedFlow<LoginEvent>(extraBufferCapacity = 1)
-    val events: SharedFlow<LoginEvent> = _events.asSharedFlow()
+    private val _events = Channel<LoginEvent>(capacity = Channel.BUFFERED)
+    val events: Flow<LoginEvent> = _events.receiveAsFlow()
 
     fun onAction(action: LoginAction) {
         when (action) {
@@ -51,6 +58,7 @@ class LoginViewModel : ViewModel() {
                 }
             }
 
+            LoginAction.OnCreateAccountClicked -> emitEvent(LoginEvent.NavigateToSignUp)
             LoginAction.OnLoginClicked -> submit()
             LoginAction.OnForgotPasswordClicked -> emitForgotPasswordMessage()
         }
@@ -68,7 +76,24 @@ class LoginViewModel : ViewModel() {
             return
         }
 
-        emitEvent(LoginEvent.ShowMessage(UiText.Resource(Res.string.auth_event_login_pending)))
+        viewModelScope.launch {
+            _state.update { it.copy(isLoading = true) }
+
+            signInUseCase(
+                email = current.email.trim(),
+                password = current.password
+            ).onSuccess { session ->
+                _state.update { state ->
+                    state.copy(isLoading = false)
+                }
+                emitEvent(LoginEvent.Authenticated(session))
+            }.onFailure { error ->
+                _state.update { state ->
+                    state.copy(isLoading = false)
+                }
+                emitEvent(LoginEvent.ShowMessage(error.toUiText()))
+            }
+        }
     }
 
     private fun emitForgotPasswordMessage() {
@@ -88,7 +113,9 @@ class LoginViewModel : ViewModel() {
     }
 
     private fun emitEvent(event: LoginEvent) {
-        _events.tryEmit(event)
+        viewModelScope.launch {
+            _events.send(event)
+        }
     }
 
     private companion object {

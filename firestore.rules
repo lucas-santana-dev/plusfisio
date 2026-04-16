@@ -1,0 +1,167 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwnUser(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function studioDoc(studioId) {
+      return /databases/$(database)/documents/studios/$(studioId);
+    }
+
+    function studioMembershipDoc(studioId, userId) {
+      return /databases/$(database)/documents/studios/$(studioId)/members/$(userId);
+    }
+
+    function currentMembershipDoc(studioId) {
+      return studioMembershipDoc(studioId, request.auth.uid);
+    }
+
+    function studioExists(studioId) {
+      return exists(studioDoc(studioId));
+    }
+
+    function isStudioMember(studioId) {
+      return isSignedIn()
+        && studioId is string
+        && exists(currentMembershipDoc(studioId))
+        && get(currentMembershipDoc(studioId)).data.isActive == true;
+    }
+
+    function isStudioOwner(studioId) {
+      return isStudioMember(studioId)
+        && get(currentMembershipDoc(studioId)).data.role == 'OwnerAdmin';
+    }
+
+    function incomingStudioIdMatchesPath(studioId) {
+      return request.resource.data.studioId == studioId;
+    }
+
+    function existingStudioIdMatchesPath(studioId) {
+      return resource.data.studioId == studioId;
+    }
+
+    function validOwnUserCreate(userId) {
+      return request.resource.data.userId == userId
+        && request.resource.data.email is string
+        && request.resource.data.studioId == null
+        && request.resource.data.role == null;
+    }
+
+    function validOwnUserUpdate(userId) {
+      return request.resource.data.userId == resource.data.userId
+        && request.resource.data.email is string
+        && request.resource.data.createdAtEpochMillis == resource.data.createdAtEpochMillis
+        && (
+          (
+            request.resource.data.studioId == null
+            && request.resource.data.role == null
+          )
+          || (
+            request.resource.data.studioId is string
+            && isStudioMember(request.resource.data.studioId)
+            && (
+              resource.data.studioId == null
+              || request.resource.data.studioId == resource.data.studioId
+            )
+            && request.resource.data.role == get(currentMembershipDoc(request.resource.data.studioId)).data.role
+          )
+        );
+    }
+
+    function validStudioCreate(studioId) {
+      return request.resource.data.studioId == studioId
+        && request.resource.data.ownerUserId == request.auth.uid
+        && request.resource.data.name is string
+        && request.resource.data.businessType is string
+        && request.resource.data.timezone is string
+        && request.resource.data.phone is string
+        && request.resource.data.isActive == true;
+    }
+
+    function validMemberCreate(studioId, userId) {
+      return request.resource.data.userId == userId
+        && request.resource.data.studioId == studioId
+        && request.resource.data.email is string
+        && request.resource.data.isActive == true;
+    }
+
+    function validTenantDocumentCreate(studioId) {
+      return incomingStudioIdMatchesPath(studioId)
+        && studioExists(studioId);
+    }
+
+    function validTenantDocumentUpdate(studioId) {
+      return incomingStudioIdMatchesPath(studioId)
+        && existingStudioIdMatchesPath(studioId);
+    }
+
+    match /users/{userId} {
+      allow read: if isOwnUser(userId);
+      allow create: if isOwnUser(userId) && validOwnUserCreate(userId);
+      allow update: if isOwnUser(userId) && validOwnUserUpdate(userId);
+      allow delete: if false;
+    }
+
+    match /studios/{studioId} {
+      allow read: if isStudioMember(studioId);
+      allow create: if isSignedIn() && validStudioCreate(studioId);
+      allow update: if isStudioOwner(studioId)
+        && existingStudioIdMatchesPath(studioId)
+        && request.resource.data.ownerUserId == resource.data.ownerUserId;
+      allow delete: if false;
+
+      match /members/{userId} {
+        allow read: if isStudioMember(studioId) || isOwnUser(userId);
+        allow create: if isOwnUser(userId)
+          && validMemberCreate(studioId, userId)
+          && studioExists(studioId)
+          && get(studioDoc(studioId)).data.ownerUserId == request.auth.uid;
+        allow update: if isStudioOwner(studioId)
+          && existingStudioIdMatchesPath(studioId)
+          && request.resource.data.userId == resource.data.userId
+          && request.resource.data.studioId == resource.data.studioId;
+        allow delete: if false;
+      }
+
+      match /clients/{clientId} {
+        allow read: if isStudioMember(studioId);
+        allow create: if isStudioMember(studioId) && validTenantDocumentCreate(studioId);
+        allow update: if isStudioMember(studioId) && validTenantDocumentUpdate(studioId);
+        allow delete: if isStudioOwner(studioId) && existingStudioIdMatchesPath(studioId);
+      }
+
+      match /appointments/{appointmentId} {
+        allow read: if isStudioMember(studioId);
+        allow create: if isStudioMember(studioId) && validTenantDocumentCreate(studioId);
+        allow update: if isStudioMember(studioId) && validTenantDocumentUpdate(studioId);
+        allow delete: if isStudioOwner(studioId) && existingStudioIdMatchesPath(studioId);
+      }
+
+      match /packages/{packageId} {
+        allow read: if isStudioMember(studioId);
+        allow create: if isStudioMember(studioId) && validTenantDocumentCreate(studioId);
+        allow update: if isStudioMember(studioId) && validTenantDocumentUpdate(studioId);
+        allow delete: if isStudioOwner(studioId) && existingStudioIdMatchesPath(studioId);
+      }
+
+      match /packageLedger/{entryId} {
+        allow read: if isStudioMember(studioId);
+        allow create: if isStudioMember(studioId) && validTenantDocumentCreate(studioId);
+        allow update: if false;
+        allow delete: if false;
+      }
+
+      match /payments/{paymentId} {
+        allow read: if isStudioMember(studioId);
+        allow create: if isStudioMember(studioId) && validTenantDocumentCreate(studioId);
+        allow update: if isStudioMember(studioId) && validTenantDocumentUpdate(studioId);
+        allow delete: if isStudioOwner(studioId) && existingStudioIdMatchesPath(studioId);
+      }
+    }
+  }
+}
