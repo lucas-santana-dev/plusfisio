@@ -93,12 +93,14 @@ Android uses local Firebase config when `composeApp/google-services.json` exists
 iOS already has:
 
 - fixed bundle identifier
+- native Firebase Apple SDK integrated via Swift Package Manager
 - guarded `FirebaseApp.configure()` in `iOSApp.swift`
 
-What still depends on Xcode:
+Local setup on macOS still requires:
 
-- adding a local `GoogleService-Info.plist` to the app target
-- adding the native Firebase Apple package so `FirebaseCore` is available in the project
+- local `GoogleService-Info.plist`
+- local `TEAM_ID` override via `Config.local.xcconfig`
+- opening `iosApp.xcodeproj` in Xcode so SwiftPM can resolve packages
 
 ## Test coverage
 

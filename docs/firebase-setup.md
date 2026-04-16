@@ -2,7 +2,7 @@
 
 ## Objetivo
 
-Documentar a configuracao local minima do Firebase para desenvolver o MVP do PlusFisio sem versionar configuracoes de ambiente reais no repositório.
+Documentar a configuracao local minima do Firebase para desenvolver o MVP do PlusFisio sem versionar configuracoes de ambiente reais no repositorio.
 
 ## O que fica versionado
 
@@ -10,7 +10,7 @@ Documentar a configuracao local minima do Firebase para desenvolver o MVP do Plu
 - `firestore.rules`
 - `firestore.indexes.json`
 
-Esses arquivos definem comportamento esperado do backend e podem permanecer no repositório.
+Esses arquivos definem comportamento esperado do backend e podem permanecer no repositorio.
 
 ## O que nao fica versionado
 
@@ -19,6 +19,18 @@ Esses arquivos definem comportamento esperado do backend e podem permanecer no r
 - `iosApp/iosApp/GoogleService-Info.plist`
 
 Esses arquivos apontam para um projeto Firebase concreto e devem existir apenas no ambiente local ou no CI seguro.
+
+## Integracao iOS no repositorio
+
+O projeto iOS referencia o Firebase Apple SDK diretamente no `iosApp.xcodeproj` via Swift Package Manager.
+
+Produtos atualmente vinculados ao target:
+
+- `FirebaseCore`
+- `FirebaseAuth`
+- `FirebaseFirestore`
+
+O arquivo `GoogleService-Info.plist` continua local e fora do Git.
 
 ## Configuracao local recomendada
 
@@ -44,9 +56,12 @@ O arquivo esta no `.gitignore` e o plugin `com.google.gms.google-services` so e 
 3. baixar `GoogleService-Info.plist`
 4. adicionar o arquivo em `iosApp/iosApp/GoogleService-Info.plist`
 5. incluir o plist no target do app no Xcode
-6. adicionar o pacote nativo do Firebase para que `FirebaseCore` esteja disponivel
+6. criar `iosApp/Configuration/Config.local.xcconfig` com o `TEAM_ID` local
+7. abrir `iosApp/iosApp.xcodeproj` no Xcode para o SwiftPM resolver os pacotes
 
-O app iOS agora protege `FirebaseApp.configure()` quando o plist nao existe, evitando crash em ambientes sem configuracao local.
+O app iOS protege `FirebaseApp.configure()` quando o plist nao existe, evitando crash em ambientes sem configuracao local.
+
+Para o passo a passo completo no Mac, ver `docs/ios-setup.md`.
 
 ## Firestore e multi-tenant
 
@@ -89,8 +104,43 @@ firebase deploy --only firestore:indexes
 firebase emulators:start
 ```
 
-## Observacoes
+### Listar projetos disponiveis
+
+```powershell
+firebase projects:list
+```
+
+## Proximos passos recomendados
+
+1. Criar os apps Android e iOS no console do Firebase.
+2. Baixar `google-services.json` e `GoogleService-Info.plist`.
+3. Habilitar `Email/Password` no Firebase Authentication.
+4. Criar os primeiros usuarios de teste no console do Firebase Authentication.
+5. Definir a modelagem inicial do Firestore dentro de `studios/{studioId}`.
+6. Implementar o onboarding que cria `studios/{studioId}` e `studios/{studioId}/members/{uid}`.
+
+## Pontos de atencao
 
 - Nao publique ids de projeto, app ids, API keys de configuracao cliente ou arquivos de ambiente reais em PRs.
+- Os arquivos `composeApp/google-services.json` e `iosApp/iosApp/GoogleService-Info.plist` precisam existir localmente e estao no `.gitignore`.
+- O provider `Email/Password` ainda precisa estar habilitado no console do Firebase Authentication.
+- O projeto iOS ja inclui o Firebase Apple SDK via Swift Package Manager; o passo manual remanescente no Mac e apenas fornecer `GoogleService-Info.plist` local e configurar assinatura.
 - Se for necessario CI com Firebase real, use secrets do provedor de CI e gere os arquivos durante o pipeline.
 - Sem configuracao local do Firebase, o app deve continuar compilando; os fluxos que dependem de backend real ficam indisponiveis ate a configuracao ser adicionada.
+- Se o onboarding inicial do estudio ainda nao estiver definido, o usuario autenticado continuara caindo no fluxo de onboarding com `studioId = null`.
+- As regras atuais bloqueiam a autoassociacao do usuario a um tenant para preservar o isolamento multi-tenant ate a entrega do onboarding real.
+
+## Quando expandir a configuracao
+
+Adicionar `Cloud Functions` quando houver necessidade clara de:
+
+- lembretes agendados
+- regras centrais de negocio sensiveis
+- automacoes de cobranca
+- sincronizacao de claims ou membership
+
+Adicionar `Storage` quando houver necessidade real de:
+
+- foto de perfil
+- anexos simples
+- arquivos de suporte operacional

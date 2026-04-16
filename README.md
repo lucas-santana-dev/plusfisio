@@ -102,22 +102,26 @@ O ICP inicial do PlusFisio é:
 
 - Android Studio atualizado
 - Xcode para build iOS
-- JDK 11
+- JDK do Android Studio configurado no terminal para o Gradle
+- Android SDK em `~/Library/Android/sdk`
+- Android SDK Command-line Tools instaladas para usar `sdkmanager`
 - configuração de projeto Firebase
 
 ### Setup inicial
 
 1. Clonar o repositório.
-2. Abrir o projeto no Android Studio.
-3. Configurar Firebase CLI e arquivos do projeto.
-4. Rodar o app Android pelo módulo `composeApp`.
-5. Abrir `iosApp` no Xcode quando a configuração iOS estiver pronta.
+2. Dar permissão ao wrapper Gradle com `chmod +x gradlew`.
+3. Expor a toolchain local no shell com `source scripts/setup-kmp-env.zsh` ou incluindo esse arquivo no `~/.zshrc`.
+4. Configurar Firebase CLI e arquivos locais do projeto.
+5. Abrir o projeto no Android Studio e aguardar o sync.
+6. Rodar o app Android pelo módulo `composeApp`.
+7. Para iOS, seguir `docs/ios-setup.md` e abrir `iosApp/iosApp.xcodeproj` no Xcode.
 
-### Observação
-
-Esta seção ainda é um placeholder operacional. O setup detalhado deve ser refinado junto com a integração real do Firebase.
+O projeto compila bytecode Java 17, mas o Gradle desta máquina pode rodar com o JBR 21 do Android Studio.
 
 Setup detalhado do Firebase: `docs/firebase-setup.md`.
+
+Setup detalhado do iOS no Mac: `docs/ios-setup.md`.
 
 ## Roadmap curto
 
@@ -133,6 +137,7 @@ Setup detalhado do Firebase: `docs/firebase-setup.md`.
 - [Arquitetura](docs/architecture.md)
 - [Firestore Model](docs/firestore-model.md)
 - [Firebase Setup](docs/firebase-setup.md)
+- [iOS Setup](docs/ios-setup.md)
 - [Auth Foundation](docs/auth.md)
 - [Engineering Workflow](docs/engineering.md)
 - [Project Management](docs/project-management.md)
@@ -145,7 +150,7 @@ The repository now includes the first functional auth foundation for the MVP:
 - typed auth contracts in `commonMain`
 - Koin wiring for auth and app root ViewModels
 - Firebase Auth + Firestore wired as the default provider on Android
-- iOS app prepared for Firebase, with the native Apple package still pending in Xcode
+- iOS app integrated with the native Firebase Apple SDK via Swift Package Manager
 
 ## Firestore Foundation Update
 
