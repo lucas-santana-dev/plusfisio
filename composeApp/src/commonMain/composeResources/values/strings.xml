@@ -127,4 +127,24 @@
     <string name="home_template_package_subtitle">Validade ate 30 abr 2026</string>
     <string name="home_template_empty_title">Nenhum atendimento neste periodo</string>
     <string name="home_template_empty_description">Crie um novo agendamento ou use a agenda semanal para planejar a proxima sequencia.</string>
+    <string name="home_title">Início</string>
+    <string name="home_welcome_message">Bom dia, %1$s. Aqui está o que exige sua ação hoje.</string>
+    <string name="home_fab">Novo agendamento</string>
+    <string name="home_home">Início</string>
+    <string name="home_agenda">Agenda</string>
+    <string name="home_clients">Clientes</string>
+    <string name="home_finance">Financeiro</string>
+    <string name="home_more">Mais</string>
+    <string name="home_loading">Carregando sua home...</string>
+    <string name="home_next_appointment_empty_title">Nenhum atendimento agendado para hoje</string>
+    <string name="home_next_appointment_empty_description">Seu studio acabou de começar. Crie o primeiro agendamento para organizar a rotina do dia.</string>
+    <string name="home_next_appointment_empty_action">Criar agendamento</string>
+    <string name="home_next_appointment_empty_secondary_action">Ver agenda</string>
+    <string name="home_empty_card_title">Não foi possível carregar o início</string>
+    <string name="home_empty_card_description">Tente novamente para atualizar a visão principal do seu dia.</string>
+    <string name="home_empty_card_action">Tentar novamente</string>
+    <string name="home_more_menu_title">Mais opções</string>
+    <string name="home_more_menu_description">Use este atalho para sair da conta enquanto a área Mais ainda está sendo finalizada.</string>
+    <string name="home_more_menu_sign_out">Sair</string>
+    <string name="home_action_feature_pending">Essa ação será conectada nas próximas etapas do fluxo.</string>
 </resources>

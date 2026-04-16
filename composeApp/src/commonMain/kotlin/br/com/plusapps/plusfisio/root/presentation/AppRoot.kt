@@ -10,7 +10,7 @@ import br.com.plusapps.plusfisio.features.auth.presentation.login.LoginRoot
 import br.com.plusapps.plusfisio.features.auth.presentation.forgotpassword.ForgotPasswordRoot
 import br.com.plusapps.plusfisio.features.auth.presentation.signup.SignUpRoot
 import br.com.plusapps.plusfisio.features.auth.presentation.splash.SplashScreen
-import br.com.plusapps.plusfisio.features.home.presentation.HomeTemplateScreen
+import br.com.plusapps.plusfisio.features.home.presentation.HomeRoot
 import br.com.plusapps.plusfisio.features.onboarding.presentation.businesssetup.BusinessSetupRoot
 import br.com.plusapps.plusfisio.features.onboarding.presentation.welcome.WelcomeScreen
 import org.koin.compose.viewmodel.koinViewModel
@@ -70,7 +70,7 @@ fun AppRoot(
             }
 
             state.route == AppRoute.Home -> {
-                HomeTemplateScreen(
+                HomeRoot(
                     session = requireNotNull(state.session),
                     onSignOutClick = viewModel::onSignOut,
                     contentPadding = innerPadding
