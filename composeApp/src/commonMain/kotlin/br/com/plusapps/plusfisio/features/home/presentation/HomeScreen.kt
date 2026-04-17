@@ -82,6 +82,7 @@ import plusfisio.composeapp.generated.resources.home_welcome_message
 @Composable
 fun HomeRoot(
     session: AuthSession,
+    onNavigateToClients: () -> Unit,
     onSignOutClick: () -> Unit,
     contentPadding: PaddingValues = PaddingValues(0.dp),
     viewModel: HomeViewModel = koinViewModel()
@@ -97,7 +98,7 @@ fun HomeRoot(
         viewModel.events.collect { event ->
             when (event) {
                 HomeEvent.NavigateToAgenda -> snackbarHostState.showSnackbar("Agenda em breve.")
-                HomeEvent.NavigateToClients -> snackbarHostState.showSnackbar("Clientes em breve.")
+                HomeEvent.NavigateToClients -> onNavigateToClients()
                 HomeEvent.NavigateToFinance -> snackbarHostState.showSnackbar("Financeiro em breve.")
                 HomeEvent.NavigateToNewAppointment -> snackbarHostState.showSnackbar("Novo agendamento em breve.")
                 is HomeEvent.OpenWhatsApp -> snackbarHostState.showSnackbar("WhatsApp em breve.")

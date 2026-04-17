@@ -18,6 +18,7 @@ class AppRootViewModel(
 
     private val _state = MutableStateFlow(AppRootState())
     val state: StateFlow<AppRootState> = _state.asStateFlow()
+    private var clientsRefreshVersion: Int = 0
 
     init {
         refreshDestination()
@@ -70,6 +71,94 @@ class AppRootViewModel(
         refreshDestination()
     }
 
+    fun onHomeRequested() {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.Home
+            )
+        }
+    }
+
+    fun onClientsRequested() {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.ClientsList(refreshVersion = clientsRefreshVersion)
+            )
+        }
+    }
+
+    fun onClientCreateRequested() {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.ClientCreate
+            )
+        }
+    }
+
+    fun onClientDetailRequested(clientId: String) {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.ClientDetail(
+                    clientId = clientId,
+                    refreshVersion = clientsRefreshVersion
+                )
+            )
+        }
+    }
+
+    fun onClientEditRequested(clientId: String) {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.ClientEdit(clientId = clientId)
+            )
+        }
+    }
+
+    fun onClientPackageRequested(clientId: String) {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.ClientPackageSessions(clientId = clientId)
+            )
+        }
+    }
+
+    fun onClientHistoryRequested(clientId: String) {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.ClientHistory(clientId = clientId)
+            )
+        }
+    }
+
+    fun onClientSaved(clientId: String) {
+        clientsRefreshVersion += 1
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.ClientDetail(
+                    clientId = clientId,
+                    refreshVersion = clientsRefreshVersion
+                )
+            )
+        }
+    }
+
+    fun onClientsBackRequested() {
+        _state.update {
+            it.copy(
+                isResolving = false,
+                route = AppRoute.ClientsList(refreshVersion = clientsRefreshVersion)
+            )
+        }
+    }
+
     fun onOnboardingWelcomeRequested() {
         _state.update {
             it.copy(
@@ -91,6 +180,7 @@ class AppRootViewModel(
     fun onSignOut() {
         viewModelScope.launch {
             signOutUseCase()
+            clientsRefreshVersion = 0
             _state.update {
                 it.copy(
                     isResolving = false,
@@ -131,6 +221,15 @@ sealed interface AppRoute {
     data object OnboardingWelcome : AppRoute
     data object OnboardingBusinessSetup : AppRoute
     data object Home : AppRoute
+    data class ClientsList(val refreshVersion: Int) : AppRoute
+    data object ClientCreate : AppRoute
+    data class ClientEdit(val clientId: String) : AppRoute
+    data class ClientDetail(
+        val clientId: String,
+        val refreshVersion: Int
+    ) : AppRoute
+    data class ClientPackageSessions(val clientId: String) : AppRoute
+    data class ClientHistory(val clientId: String) : AppRoute
 }
 
 private fun AuthSession?.toRoute(): AppRoute {
